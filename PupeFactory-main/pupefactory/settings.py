@@ -92,6 +92,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # Context processor obligatorio con los datos del alumno en footer
                 'apps.core.context_processors.footer_context',
+                # Context processor con contador dinámico del carro de compras
+                'apps.carro.context_processors.carro_context',
             ],
         },
     },

@@ -25,7 +25,7 @@
 | **Modelos** | Atributo con `CHOICES` definido (estados de orden/transacción) | [x] | `apps/ordenes/models.py` (`Orden.Estado.choices`) |
 | **Filtros** | `django-filter` configurado en endpoints de consulta (`/api/productos/`) | [x] | `apps/catalogo/filters.py` (Categoría, marca, precio_min, precio_max, disponible) |
 | **Autenticación** | Login JWT retornando tokens (access/refresh) y claims de rol | [x] | `apps/usuarios/serializers.py` (`user_id`, `username`, `role`) |
-| **Carro** | Persistencia post-logout en PostgreSQL (relación 1:1 con usuario) | [!] | Modelo `Carrito` (1:1) en PostgreSQL (endpoints en Fase 4) |
+| **Carro** | Persistencia post-logout en PostgreSQL (relación 1:1 con usuario) | [x] | Modelo `Carrito` (1:1), endpoints `/api/carro/`, templates web (26 tests aprobados) |
 | **Stock/Cupos** | Validación y descuento atómico al cambiar a estado `PAGADO` | [ ] | `apps/ordenes/services.py` |
 
 ---
@@ -44,17 +44,17 @@
 - [x] Inclusión de claims personalizados en el payload JWT (`role`: `CLIENTE` o `ADMINISTRADOR`, `username`, `user_id`).
 - [!] Permisos DRF:
   - Lectura pública: `/api/productos/`, `/api/categorias/` [x].
-  - Protegido (`IsAuthenticated` / Cliente): `/api/carro/`, `/api/ordenes/checkout/`, `/api/mis-ordenes/` (Fase 4 y 5).
+  - Protegido (`IsAuthenticated` / Cliente): `/api/carro/` [x]; `/api/ordenes/checkout/`, `/api/mis-ordenes/` (Fase 5).
   - Restringido (`IsAdminUser` / `IsAdminRole`): Swagger `/api/docs/` y CRUD productos (`POST`, `PUT`, `PATCH`, `DELETE`) [x]; CRUD órdenes (Fase 5).
 
 ### 2.3 Persistencia del Carro de Compras (8 Pts)
-- [ ] Relación 1 a 1 entre Usuario y Carro activo en BD PostgreSQL.
-- [ ] CarroItem con clave única `(carrito, producto)` para evitar duplicidad de registros del mismo producto.
-- [ ] Persistencia garantizada al cerrar sesión o cambiar de dispositivo.
-- [ ] Métodos para agregar, actualizar cantidad y eliminar ítems.
+- [x] Relación 1 a 1 entre Usuario y Carro activo en BD PostgreSQL.
+- [x] CarroItem con clave única `(carrito, producto)` para evitar duplicidad de registros del mismo producto.
+- [x] Persistencia garantizada al cerrar sesión o cambiar de dispositivo.
+- [x] Métodos para agregar, actualizar cantidad y eliminar ítems.
 
 ### 2.4 Lógica de Stock y Transacciones Atómicas (8 Pts)
-- [ ] Agregar al carro **NO** descuenta inventario.
+- [x] Agregar al carro **NO** descuenta inventario (probado en tests Fase 4).
 - [ ] Transición de estados de la orden: `PENDIENTE` -> `PAGADO` -> `ENTREGADO` / `CANCELADO`.
 - [ ] Descuento de stock únicamente al pasar a `PAGADO`.
 - [ ] Uso estricto de transacciones atómicas (`transaction.atomic()`) y bloqueo pesimista (`select_for_update()`) para compras concurrentes.
@@ -82,7 +82,8 @@
 - [!] **Frontend Django Templates:**
   - Diseño temático "PupeFactory" base (`base.html`, `login.html`, `home.html`, `404.html`).
   - Footer con datos del alumno visible y renderizado en todas las vistas base. [x]
-  - Catálogo, detalle, carro y checkout se implementarán en Fases 3 y 4. [ ]
+  - Catálogo, detalle de producto y carro web interactivo implementados y probados. [x]
+  - Checkout y órdenes se implementarán en Fase 5. [ ]
 
 ---
 
@@ -95,9 +96,9 @@
 | `GET` | `/api/productos/` | Público | Listado y filtros de productos | [x] |
 | `GET` | `/api/productos/{id}/` | Público | Detalle de un producto | [x] |
 | `GET` | `/api/categorias/` | Público | Listado de categorías | [x] |
-| `GET` | `/api/carro/` | Cliente | Consultar carro activo del usuario | [ ] |
-| `POST` | `/api/carro/` | Cliente | Agregar producto o modificar cantidad | [ ] |
-| `DELETE` | `/api/carro/{producto_id}/` | Cliente | Eliminar producto del carro | [ ] |
+| `GET` | `/api/carro/` | Cliente | Consultar carro activo del usuario | [x] |
+| `POST` | `/api/carro/` | Cliente | Agregar producto o modificar cantidad | [x] |
+| `DELETE` | `/api/carro/{producto_id}/` | Cliente | Eliminar producto del carro | [x] |
 | `POST` | `/api/ordenes/checkout/` | Cliente | Iniciar compra / checkout | [ ] |
 | `GET` | `/api/mis-ordenes/` | Cliente | Historial de órdenes del usuario logueado | [ ] |
 | `POST` | `/api/productos/` | Administrador | Crear nuevo producto | [x] |
