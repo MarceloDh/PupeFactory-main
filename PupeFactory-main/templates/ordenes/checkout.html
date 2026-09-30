@@ -39,7 +39,7 @@
                         <!-- Imagen miniatura -->
                         <div style="width: 65px; height: 65px; background: rgba(0,0,0,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border);">
                             {% if item.producto.imagen_final %}
-                                <img src="{{ item.producto.imagen_final }}" alt="{{ item.producto.nombre }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                <img src="{{ item.producto.imagen_final }}" alt="{{ item.producto.nombre }}" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='/static/images/no-image.svg';">
                             {% else %}
                                 <svg class="icon" viewBox="0 0 24 24" style="width: 1.5rem; height: 1.5rem; color: var(--text-muted);">
                                     <rect x="2" y="2" width="20" height="8" rx="2"></rect>

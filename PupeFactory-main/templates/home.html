@@ -204,7 +204,7 @@
                     <!-- Caja de Imagen Real -->
                     <a href="{% url 'producto_detalle' producto.id %}" class="card-image-box">
                         {% if producto.get_imagen_url %}
-                            <img src="{{ producto.get_imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+                            <img src="{{ producto.get_imagen_url }}" alt="{{ producto.nombre }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/no-image.svg';">
                         {% else %}
                             <svg class="icon" style="width: 4rem; height: 4rem; color: #CBD5E1;" viewBox="0 0 24 24">
                                 <rect x="4" y="4" width="16" height="16" rx="2"></rect>

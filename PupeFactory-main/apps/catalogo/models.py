@@ -126,7 +126,7 @@ class Producto(models.Model):
                 pass
         if self.imagen_url:
             return self.imagen_url
-        return None
+        return '/static/images/no-image.svg'
 
     @property
     def imagen_final(self):

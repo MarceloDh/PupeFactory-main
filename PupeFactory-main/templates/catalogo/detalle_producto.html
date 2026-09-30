@@ -17,7 +17,7 @@
         <!-- Columna Izquierda: Imagen del Producto -->
         <div class="detail-image-box">
             {% if producto.get_imagen_url %}
-                <img src="{{ producto.get_imagen_url }}" alt="{{ producto.nombre }}">
+                <img src="{{ producto.get_imagen_url }}" alt="{{ producto.nombre }}" onerror="this.onerror=null; this.src='/static/images/no-image.svg';">
             {% else %}
                 <svg class="icon" style="width: 6rem; height: 6rem; color: #CBD5E1;" viewBox="0 0 24 24">
                     <rect x="4" y="4" width="16" height="16" rx="2"></rect>
