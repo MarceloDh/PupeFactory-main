@@ -26,7 +26,7 @@
 | **Filtros** | `django-filter` configurado en endpoints de consulta (`/api/productos/`) | [x] | `apps/catalogo/filters.py` (Categoría, marca, precio_min, precio_max, disponible) |
 | **Autenticación** | Login JWT retornando tokens (access/refresh) y claims de rol | [x] | `apps/usuarios/serializers.py` (`user_id`, `username`, `role`) |
 | **Carro** | Persistencia post-logout en PostgreSQL (relación 1:1 con usuario) | [x] | Modelo `Carrito` (1:1), endpoints `/api/carro/`, templates web (26 tests aprobados) |
-| **Stock/Cupos** | Validación y descuento atómico al cambiar a estado `PAGADO` | [ ] | `apps/ordenes/services.py` |
+| **Stock/Cupos** | Validación y descuento atómico al cambiar a estado `PAGADO` | [x] | `apps/ordenes/services.py` (select_for_update, reposición al cancelar) |
 
 ---
 
@@ -42,10 +42,10 @@
 ### 2.2 Autenticación JWT y Roles (8 Pts)
 - [x] Endpoints de token JWT (`/api/auth/token/`, `/api/auth/token/refresh/`).
 - [x] Inclusión de claims personalizados en el payload JWT (`role`: `CLIENTE` o `ADMINISTRADOR`, `username`, `user_id`).
-- [!] Permisos DRF:
+- [x] Permisos DRF:
   - Lectura pública: `/api/productos/`, `/api/categorias/` [x].
-  - Protegido (`IsAuthenticated` / Cliente): `/api/carro/` [x]; `/api/ordenes/checkout/`, `/api/mis-ordenes/` (Fase 5).
-  - Restringido (`IsAdminUser` / `IsAdminRole`): Swagger `/api/docs/` y CRUD productos (`POST`, `PUT`, `PATCH`, `DELETE`) [x]; CRUD órdenes (Fase 5).
+  - Protegido (`IsAuthenticated` / Cliente): `/api/carro/` [x]; `/api/ordenes/checkout/`, `/api/mis-ordenes/` [x].
+  - Restringido (`IsAdminUser` / `IsAdminRole`): Swagger `/api/docs/` y CRUD productos (`POST`, `PUT`, `PATCH`, `DELETE`) [x]; CRUD y cambio de estado de órdenes (`/api/ordenes/{id}/estado/`) [x].
 
 ### 2.3 Persistencia del Carro de Compras (8 Pts)
 - [x] Relación 1 a 1 entre Usuario y Carro activo en BD PostgreSQL.
@@ -55,20 +55,20 @@
 
 ### 2.4 Lógica de Stock y Transacciones Atómicas (8 Pts)
 - [x] Agregar al carro **NO** descuenta inventario (probado en tests Fase 4).
-- [ ] Transición de estados de la orden: `PENDIENTE` -> `PAGADO` -> `ENTREGADO` / `CANCELADO`.
-- [ ] Descuento de stock únicamente al pasar a `PAGADO`.
-- [ ] Uso estricto de transacciones atómicas (`transaction.atomic()`) y bloqueo pesimista (`select_for_update()`) para compras concurrentes.
-- [ ] Si stock es insuficiente al pagar, la transacción se cancela/rechaza sin afectar datos.
-- [ ] Reposición automática de stock al catálogo si una orden `PAGADO` pasa a `CANCELADO`.
-- [ ] Control para evitar doble reposición de inventario.
-- [ ] Congelación de precio histórico en `OrdenItem.precio_unitario`.
+- [x] Transición de estados de la orden: `PENDIENTE` -> `PAGADO` -> `ENTREGADO` / `CANCELADO`.
+- [x] Descuento de stock únicamente al pasar a `PAGADO`.
+- [x] Uso estricto de transacciones atómicas (`transaction.atomic()`) y bloqueo pesimista (`select_for_update()`) para compras concurrentes.
+- [x] Si stock es insuficiente al pagar, la transacción se cancela/rechaza sin afectar datos.
+- [x] Reposición automática de stock al catálogo si una orden `PAGADO` pasa a `CANCELADO`.
+- [x] Control para evitar doble reposición de inventario (`stock_reincorporado = BooleanField(default=False)`).
+- [x] Congelación de precio histórico en `OrdenItem.precio_unitario` (3FN).
 
 ---
 
 ## 3. Requerimientos de Fotografías de la Pizarra y Pautas Adicionales
 
-- [ ] **3FN (Tercera Forma Normal):** Modelo relacional normalizado sin dependencias parciales ni transitivas.
-- [ ] **Refactoring Guru / Clean Code:** Separación de responsabilidades, funciones pequeñas, uso de `services.py` para lógica de negocio pesada (checkout, stock).
+- [x] **3FN (Tercera Forma Normal):** Modelo relacional normalizado sin dependencias parciales ni transitivas; congelación de precio histórico en `OrdenItem.precio_unitario`.
+- [x] **Refactoring Guru / Clean Code:** Separación de responsabilidades, funciones pequeñas, uso de `services.py` para lógica de negocio pesada (`apps/ordenes/services.py`, `apps/carro/services.py`).
 - [x] **Error 404 Personalizado:**
   - Template `404.html` estilizado según la identidad visual de la tienda para rutas web (`/FRgregreghre` -> HTML 404).
   - Rutas de API inexistentes retornan JSON estandarizado (`/api/FRgregreghre/` -> `{ "error": "Recurso no encontrado.", "status": 404 }`).
@@ -79,11 +79,11 @@
   - `/api/docs/` y `/api/schema/` accesibles exclusivamente por usuarios con rol `ADMINISTRADOR`.
   - Clientes y anónimos reciben 403 Forbidden o 401 Unauthorized en backend.
   - Soporte Bearer JWT integrado en Swagger UI.
-- [!] **Frontend Django Templates:**
+- [x] **Frontend Django Templates:**
   - Diseño temático "PupeFactory" base (`base.html`, `login.html`, `home.html`, `404.html`).
   - Footer con datos del alumno visible y renderizado en todas las vistas base. [x]
   - Catálogo, detalle de producto y carro web interactivo implementados y probados. [x]
-  - Checkout y órdenes se implementarán en Fase 5. [ ]
+  - Checkout, confirmación de compra y mis órdenes web implementados y probados. [x]
 
 ---
 
@@ -99,12 +99,12 @@
 | `GET` | `/api/carro/` | Cliente | Consultar carro activo del usuario | [x] |
 | `POST` | `/api/carro/` | Cliente | Agregar producto o modificar cantidad | [x] |
 | `DELETE` | `/api/carro/{producto_id}/` | Cliente | Eliminar producto del carro | [x] |
-| `POST` | `/api/ordenes/checkout/` | Cliente | Iniciar compra / checkout | [ ] |
-| `GET` | `/api/mis-ordenes/` | Cliente | Historial de órdenes del usuario logueado | [ ] |
+| `POST` | `/api/ordenes/checkout/` | Cliente | Iniciar compra / checkout | [x] |
+| `GET` | `/api/mis-ordenes/` | Cliente | Historial de órdenes del usuario logueado | [x] |
 | `POST` | `/api/productos/` | Administrador | Crear nuevo producto | [x] |
 | `PUT/PATCH` | `/api/productos/{id}/` | Administrador | Modificar producto existente | [x] |
 | `DELETE` | `/api/productos/{id}/` | Administrador | Desactivar producto (baja lógica `activo=False`) | [x] |
-| `PATCH` | `/api/ordenes/{id}/estado/` | Administrador | Cambiar estado de orden (manejo de stock) | [ ] |
+| `PATCH` | `/api/ordenes/{id}/estado/` | Administrador | Cambiar estado de orden (manejo de stock) | [x] |
 | `GET` | `/api/docs/` | Administrador | Documentación Swagger/OpenAPI protegida | [x] |
 
 ---

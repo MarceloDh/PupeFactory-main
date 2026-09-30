@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Compra Exitosa — Orden {{ orden.numero_orden }} | PupeFactory{% endblock %}
+
+{% block content %}
+<div style="max-width: 850px; margin: 2rem auto; padding: 0 1rem;">
+    <!-- Tarjeta de Éxito Principal -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3rem 2rem; text-align: center; margin-bottom: 2rem;">
+        <div style="width: 70px; height: 70px; background: rgba(34, 197, 94, 0.15); border: 2px solid var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <svg class="icon" viewBox="0 0 24 24" style="width: 2.5rem; height: 2.5rem; color: var(--success);">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem;">
+            ¡Compra realizada correctamente!
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 1.25rem;">
+            Tu pedido ha sido procesado de forma atómica y el stock fue reservado exitosamente.
+        </p>
+
+        <div style="display: inline-flex; align-items: center; gap: 0.75rem; background: rgba(0, 217, 255, 0.08); border: 1px solid rgba(0, 217, 255, 0.25); padding: 0.75rem 1.5rem; border-radius: 30px;">
+            <span style="font-size: 0.95rem; color: var(--text-muted);">Número de orden:</span>
+            <strong style="font-size: 1.35rem; color: var(--brand); letter-spacing: 0.05em; font-family: monospace;">{{ orden.numero_orden }}</strong>
+            <span style="background: rgba(34, 197, 94, 0.2); color: var(--success); font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 12px; margin-left: 0.5rem;">
+                {{ orden.get_estado_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Detalle de Productos Comprados con Precio Congelado -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Resumen del Comprobante</span>
+            <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">
+                Fecha: {{ orden.creado_en|date:"d/m/Y H:i" }}
+            </span>
+        </h2>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for item in orden.items.all %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                    <div>
+                        <strong style="color: var(--text); font-size: 1rem; display: block;">{{ item.producto.nombre }}</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">
+                            SKU: {{ item.producto.sku }} | Cantidad: {{ item.cantidad }} un. | Precio congelado: ${{ item.precio_unitario|floatformat:0 }}
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--brand);">
+                            ${{ item.subtotal|floatformat:0 }}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 1.5rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 1.2rem; font-weight: 800; color: var(--text);">Total Pagado:</span>
+            <span style="font-size: 1.75rem; font-weight: 900; color: var(--brand);">${{ orden.total|floatformat:0 }}</span>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'mis_ordenes' %}" class="btn-brand" style="padding: 0.85rem 1.75rem; text-decoration: none; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 0.5rem;">
+            <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Ver Mis Compras</span>
+        </a>
+
+        <a href="{% url 'catalogo' %}" class="btn-secondary" style="padding: 0.85rem 1.75rem; text-decoration: none; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 0.5rem;">
+            <svg class="icon icon-sm" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Explorar más Componentes</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

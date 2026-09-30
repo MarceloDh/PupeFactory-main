@@ -127,3 +127,9 @@ class Producto(models.Model):
         if self.imagen_url:
             return self.imagen_url
         return None
+
+    @property
+    def imagen_final(self):
+        """Alias para get_imagen_url asegurando compatibilidad con plantillas y serializadores."""
+        return self.get_imagen_url
+

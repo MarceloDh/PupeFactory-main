@@ -145,12 +145,12 @@
                     <span style="font-size: 1.5rem; font-weight: 800; color: var(--brand);">${{ carrito.total|floatformat:0 }}</span>
                 </div>
 
-                <!-- Botón de checkout deshabilitado para Fase 4 -->
-                <button disabled class="btn-secondary" style="width: 100%; padding: 0.85rem; font-size: 1rem; opacity: 0.65; cursor: not-allowed; margin-bottom: 0.75rem; text-align: center;" title="El checkout y pago se implementarán en Fase 5">
-                    <span>Continuar al Pago (Fase 5)</span>
-                </button>
+                <!-- Botón de checkout activo hacia Fase 5 -->
+                <a href="{% url 'checkout' %}" class="btn-brand" style="display: block; width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; text-align: center; text-decoration: none; border-radius: var(--radius-sm);" title="Proceder a la confirmación de la orden y pago">
+                    <span>Continuar al Checkout</span>
+                </a>
 
-                <a href="{% url 'catalogo' %}" class="btn-brand" style="display: block; width: 100%; padding: 0.75rem; font-size: 0.9rem; text-align: center; text-decoration: none; border-radius: var(--radius-sm);">
+                <a href="{% url 'catalogo' %}" class="btn-secondary" style="display: block; width: 100%; padding: 0.75rem; font-size: 0.9rem; text-align: center; text-decoration: none; border-radius: var(--radius-sm);">
                     Seguir Comprando
                 </a>
             </div>

@@ -42,4 +42,21 @@ Este documento recopila las decisiones de arquitectura, modelo y diseño adoptad
 - **Centralización de Estilos en CSS Nativo:** Se consolidó el diseño en `static/css/pupefactory.css` con variables CSS (`:root`), estructurando layout de 2 columnas (sidebar izquierda de filtros + grid derecha de productos), card de producto retail y vistas de login/404 coherentes.
 - **Identidad de Marca y Carrusel Promocional (Panel Principal):** Se integró el logotipo oficial `logo.png` (isotipo felino PF + tipografía comercial) en el encabezado y un carrusel dinámico en `home.html` con 4 banners en alta resolución (`banner_1_gpus.png`, `banner_2_setup.png`, `banner_3_speed.png`, `banner_4_cpus.png`), soporte táctil/teclado, navegación por puntos y enlace directo al catálogo por categorías.
 
+---
+
+## Fase 4: Carro de Compras Persistente
+- **Persistencia Relacional Estricta:** El carro se asocia directamente a `CustomUser 1:1 Carrito` y `Carrito 1:N CarritoItem` en PostgreSQL, sin recurrir a cookies, localStorage o sesiones efímeras.
+- **Invariante de Inventario:** Agregar, modificar o remover ítems del carro jamás altera `Producto.stock`. El stock solo se modifica en el momento de la confirmación de compra (`PAGADO`).
+- **Seguridad Anti-IDOR:** El usuario propietario del carro siempre se resuelve en backend mediante `request.user`. Nunca se aceptan parámetros como `usuario_id` o `carrito_id` desde el cliente.
+- **Cálculo Monetario Exacto:** Utilización exclusiva del tipo `Decimal` para subtotales y totales monetarios, evitando errores de precisión de punto flotante.
+
+---
+
+## Fase 5: Checkout, Órdenes, Stock Atómico y Gestión de Estados
+- **Transacciones Atómicas y Bloqueo Pesimista:** `transaction.atomic()` y `select_for_update()` en `apps/ordenes/services.py` para bloquear las filas de los productos comprados ordenados por ID, previniendo condiciones de carrera (race conditions), sobreventas o interbloqueos (deadlocks) ante compras simultáneas.
+- **Congelamiento de Precio Histórico (3FN):** `OrdenItem.precio_unitario` almacena el valor inmutable al momento de la transacción. Modificaciones futuras de precio en el catálogo no impactan las órdenes previas.
+- **Máquina de Estados de la Orden:** `CHOICES` explícito (`PENDIENTE`, `PAGADO`, `ENTREGADO`, `CANCELADO`) con matriz estricta de transiciones legales (`TRANSICIONES_VALIDAS`).
+- **Reposición Atómica de Inventario y Control Anti-Duplicidad:** Al transicionar de `PAGADO` a `CANCELADO`, los productos devuelven sus unidades al inventario físico de forma atómica y se activa la bandera `stock_reincorporado = True` para impedir dobles devoluciones.
+- **Separación de Responsabilidades (Clean Architecture):** Toda la lógica transaccional de negocio reside en `OrdenService` (`apps/ordenes/services.py`), manteniendo vistas REST y web delgadas y desacopladas.
+
 

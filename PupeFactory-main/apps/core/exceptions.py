@@ -48,9 +48,17 @@ def custom_exception_handler(exc, context):
 
     # Para otros errores gestionados por DRF
     if response is not None:
+        error_msg = "Error en la solicitud."
+        if isinstance(response.data, dict) and "error" in response.data:
+            error_msg = response.data["error"]
+        elif isinstance(response.data, dict) and "detail" in response.data:
+            error_msg = str(response.data["detail"])
+        elif isinstance(response.data, list) and len(response.data) > 0:
+            error_msg = str(response.data[0])
+
         custom_data = {
             "status": response.status_code,
-            "error": "Error en la solicitud.",
+            "error": error_msg,
             "detalles": response.data
         }
         response.data = custom_data
