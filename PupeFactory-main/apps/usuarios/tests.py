@@ -156,3 +156,124 @@ class AutenticacionYPermisosTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn('status', response.data)
         self.assertEqual(response.data['status'], 401)
+
+    # ==========================================================================
+    # PRUEBAS DE REGISTRO DE CUENTA (CREAR CUENTA / CHECKOUT INVITATION)
+    # ==========================================================================
+
+    def test_registro_web_exitoso_y_autologin(self):
+        """El registro web crea un usuario con rol CLIENTE y lo loguea automáticamente."""
+        url = reverse('register')
+        data = {
+            'username': 'nuevo_cliente',
+            'email': 'nuevo@pupefactory.cl',
+            'first_name': 'Carlos',
+            'last_name': 'González',
+            'password': 'PasswordSegura123!',
+            'password_confirm': 'PasswordSegura123!',
+        }
+        response = self.web_client.post(url, data, follow=True)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Verificar que el usuario fue creado en la base de datos
+        user = CustomUser.objects.get(username='nuevo_cliente')
+        self.assertEqual(user.email, 'nuevo@pupefactory.cl')
+        self.assertEqual(user.first_name, 'Carlos')
+        self.assertEqual(user.role, CustomUser.Role.CLIENTE)
+        self.assertTrue(user.check_password('PasswordSegura123!'))
+
+        # Verificar autologin en sesión
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, 'nuevo_cliente')
+
+    def test_registro_web_redireccion_checkout(self):
+        """El registro web preserva el parámetro next=/checkout/ y redirige al flujo de pago."""
+        url = f"{reverse('register')}?next=/checkout/"
+        # Comprobar que en GET se muestra el banner de invitación a pago
+        get_res = self.web_client.get(url)
+        self.assertEqual(get_res.status_code, status.HTTP_200_OK)
+        self.assertContains(get_res, "¡Estás a un paso de completar tu compra!")
+
+        data = {
+            'username': 'comprador_directo',
+            'email': 'comprador@pupefactory.cl',
+            'first_name': 'Ana',
+            'last_name': 'Reyes',
+            'password': 'PasswordSegura123!',
+            'password_confirm': 'PasswordSegura123!',
+            'next': '/checkout/',
+        }
+        post_res = self.web_client.post(url, data, follow=False)
+        # Debe redirigir directamente a /checkout/
+        self.assertEqual(post_res.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(post_res.url, '/checkout/')
+
+    def test_login_muestra_banner_invitacion_checkout(self):
+        """Al ingresar a login con next=/checkout/, se invita a loguearse o crear cuenta."""
+        url = f"{reverse('login')}?next=/checkout/"
+        response = self.web_client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, "¡Estás a un paso de completar tu compra!")
+        self.assertContains(response, "crea una cuenta nueva aquí")
+        self.assertContains(response, "Crear Cuenta Gratuita")
+
+    def test_registro_web_error_passwords_no_coinciden(self):
+        """El registro rechaza si password y password_confirm difieren."""
+        url = reverse('register')
+        data = {
+            'username': 'error_pwd',
+            'email': 'error@pupefactory.cl',
+            'password': 'PasswordSegura123!',
+            'password_confirm': 'PasswordDiferente999!',
+        }
+        response = self.web_client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(CustomUser.objects.filter(username='error_pwd').exists())
+        self.assertContains(response, "Las contraseñas no coinciden.")
+
+    def test_registro_web_error_username_duplicado(self):
+        """El registro rechaza usernames ya registrados."""
+        url = reverse('register')
+        data = {
+            'username': 'cliente_test',  # Ya creado en setUp
+            'email': 'otro_correo@pupefactory.cl',
+            'password': 'PasswordSegura123!',
+            'password_confirm': 'PasswordSegura123!',
+        }
+        response = self.web_client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, "Este nombre de usuario ya se encuentra registrado.")
+
+    def test_registro_api_exitoso(self):
+        """POST /api/auth/register/ crea el usuario CLIENTE y retorna tokens JWT."""
+        url = reverse('api_register')
+        data = {
+            'username': 'api_user',
+            'email': 'api@pupefactory.cl',
+            'first_name': 'Mario',
+            'last_name': 'Silva',
+            'password': 'PasswordSegura123!',
+            'password_confirm': 'PasswordSegura123!',
+        }
+        response = self.api_client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('tokens', response.data)
+        self.assertIn('access', response.data['tokens'])
+        self.assertIn('refresh', response.data['tokens'])
+        self.assertEqual(response.data['user']['role'], CustomUser.Role.CLIENTE)
+
+        # Verificar que el usuario existe en base de datos
+        self.assertTrue(CustomUser.objects.filter(username='api_user').exists())
+
+    def test_registro_api_error_validacion(self):
+        """POST /api/auth/register/ rechaza peticiones con datos incompletos o inválidos."""
+        url = reverse('api_register')
+        data = {
+            'username': 'api_user',
+            'email': 'not-an-email',
+            'password': '123',  # demasiado corta
+            'password_confirm': '456',
+        }
+        response = self.api_client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+

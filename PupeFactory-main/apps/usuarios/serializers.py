@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from apps.usuarios.models import CustomUser
 
@@ -39,3 +40,45 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         }
 
         return data
+
+
+class RegistroSerializer(serializers.ModelSerializer):
+    """
+    Serializador para el registro de nuevos usuarios clientes vía API REST.
+    Crea el usuario con rol CLIENTE y hashea la contraseña de forma segura.
+    """
+    password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password', 'password_confirm', 'role']
+        read_only_fields = ['id', 'role']
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("Este nombre de usuario ya está registrado.")
+        return value
+
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("El correo electrónico es obligatorio.")
+        if CustomUser.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Ya existe una cuenta con este correo electrónico.")
+        return value.lower()
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('password_confirm'):
+            raise serializers.ValidationError({"password_confirm": "Las contraseñas no coinciden."})
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        password = validated_data.pop('password')
+        user = CustomUser.objects.create_user(
+            role=CustomUser.Role.CLIENTE,
+            password=password,
+            **validated_data
+        )
+        return user
+
