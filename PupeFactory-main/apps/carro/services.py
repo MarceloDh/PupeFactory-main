@@ -72,7 +72,8 @@ class CartService:
 
         if cantidad_final > producto.stock:
             raise DRFValidationError({
-                "error": f"Stock insuficiente. Solo hay {producto.stock} unidades disponibles.",
+                "error": f"Stock insuficiente para '{producto.nombre}'. Solo hay {producto.stock} unidades disponibles.",
+                "disponible": producto.stock,
                 "status": 400
             })
 
@@ -122,7 +123,8 @@ class CartService:
 
         if nueva_cantidad > producto.stock:
             raise DRFValidationError({
-                "error": f"Stock insuficiente. Solo hay {producto.stock} unidades disponibles.",
+                "error": f"Stock insuficiente para '{producto.nombre}'. Solo hay {producto.stock} unidades disponibles.",
+                "disponible": producto.stock,
                 "status": 400
             })
 

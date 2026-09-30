@@ -74,6 +74,7 @@ class OrdenService:
                 if p.stock < item.cantidad:
                     raise DRFValidationError({
                         "error": f"Stock insuficiente para '{p.nombre}'. Unidades disponibles: {p.stock}, solicitadas: {item.cantidad}.",
+                        "disponible": p.stock,
                         "status": 400
                     })
 
