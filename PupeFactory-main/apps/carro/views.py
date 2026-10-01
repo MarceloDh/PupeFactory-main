@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
+from apps.carro.models import CarritoItem
 from apps.carro.services import CartService
 from apps.carro.serializers import (
     CarritoSerializer,
@@ -215,7 +216,7 @@ class CarroEliminarWebView(LoginRequiredMixin, View):
         try:
             CartService.remove_item(request.user, producto_id)
             messages.info(request, "Producto eliminado del carro.")
-        except Exception as e:
+        except Exception:
             messages.error(request, "No se pudo eliminar el producto del carro.")
 
         return redirect('carro_detalle')
