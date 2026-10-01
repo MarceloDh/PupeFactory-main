@@ -46,6 +46,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             'marca',
             'marca_nombre',
             'descripcion',
+            'especificaciones',
             'precio',
             'stock',
             'activo',
@@ -79,3 +80,25 @@ class ProductoSerializer(serializers.ModelSerializer):
         if qs.exists():
             raise serializers.ValidationError("Ya existe un producto registrado con este código SKU.")
         return sku_clean
+
+
+class ProductoEspecificacionItemSerializer(serializers.Serializer):
+    clave = serializers.CharField(help_text="Nombre de la característica técnica (ej: Socket, Frecuencia, VRAM)")
+    valor = serializers.CharField(help_text="Valor o especificación técnica correspondiente")
+
+
+class ProductoEspecificacionesDetailSerializer(serializers.Serializer):
+    """
+    Serializador para el endpoint de tabla de especificaciones técnicas:
+    GET /api/productos/{id}/especificaciones/
+    """
+    producto_id = serializers.IntegerField()
+    nombre = serializers.CharField()
+    sku = serializers.CharField()
+    categoria = serializers.CharField()
+    marca = serializers.CharField()
+    precio = serializers.DecimalField(max_digits=12, decimal_places=2)
+    disponible = serializers.BooleanField()
+    especificaciones = serializers.DictField(child=serializers.CharField())
+    tabla = ProductoEspecificacionItemSerializer(many=True)
+

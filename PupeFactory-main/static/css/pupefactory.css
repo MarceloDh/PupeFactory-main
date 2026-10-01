@@ -615,12 +615,47 @@ a {
     box-shadow: var(--shadow-sm);
 }
 
+.specs-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
 .specs-title {
     font-size: 1.15rem;
     font-weight: 700;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+}
+
+.btn-api-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--brand-subtle);
+    color: var(--brand);
+    border: 1px solid rgba(236, 62, 143, 0.3);
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-api-badge:hover {
+    background: var(--brand);
+    color: #FFFFFF;
+    border-color: var(--brand);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(236, 62, 143, 0.25);
 }
 
 .specs-content {
@@ -629,6 +664,63 @@ a {
     line-height: 1.7;
     white-space: pre-line;
 }
+
+.specs-table-container {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: 1.25rem;
+    background: var(--surface);
+}
+
+.specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.specs-table thead {
+    background: #FAFAFB;
+    border-bottom: 2px solid var(--border);
+}
+
+.specs-table th {
+    padding: 0.75rem 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.specs-table td {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.specs-table tr:last-child td {
+    border-bottom: none;
+}
+
+.specs-table tr:hover td {
+    background-color: #F9FAFB;
+}
+
+.specs-table .spec-label {
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 35%;
+    background-color: #FCFCFD;
+}
+
+.specs-table .spec-value {
+    color: var(--text);
+    font-weight: 500;
+}
+
 
 /* ==============================================================================
    FOOTER OBLIGATORIO SEGÚN RÚBRICA

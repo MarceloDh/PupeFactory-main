@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
@@ -86,6 +87,12 @@ class Producto(models.Model):
         verbose_name='URL de Imagen Externa',
         help_text='Enlace HTTP/HTTPS a imagen del producto si no se sube archivo local.'
     )
+    especificaciones = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='Especificaciones Técnicas',
+        help_text='Diccionario de especificaciones técnicas clave-valor del componente'
+    )
     activo = models.BooleanField(
         default=True,
         verbose_name='¿Activo para la venta?',
@@ -117,11 +124,19 @@ class Producto(models.Model):
         return self.stock > 0
 
     @property
+    def get_especificaciones_items(self):
+        """Retorna lista de diccionarios [{'clave': k, 'valor': v}] para renderizado en tabla HTML."""
+        if not self.especificaciones or not isinstance(self.especificaciones, dict):
+            return []
+        return [{'clave': k, 'valor': v} for k, v in self.especificaciones.items()]
+
+    @property
     def get_imagen_url(self):
-        """Retorna la URL local si existe, la URL remota externa o None."""
+        """Retorna la URL local si el archivo físico existe en disco, la URL remota externa o no-image.svg."""
         if self.imagen:
             try:
-                return self.imagen.url
+                if hasattr(self.imagen, 'path') and os.path.exists(self.imagen.path):
+                    return self.imagen.url
             except Exception:
                 pass
         if self.imagen_url:
@@ -132,4 +147,5 @@ class Producto(models.Model):
     def imagen_final(self):
         """Alias para get_imagen_url asegurando compatibilidad con plantillas y serializadores."""
         return self.get_imagen_url
+
 

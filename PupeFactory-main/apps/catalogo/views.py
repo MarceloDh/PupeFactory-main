@@ -1,17 +1,25 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.db.models import Q, ProtectedError
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from apps.catalogo.models import Categoria, Marca, Producto
-from apps.catalogo.serializers import CategoriaSerializer, MarcaSerializer, ProductoSerializer
+from apps.catalogo.serializers import (
+    CategoriaSerializer,
+    MarcaSerializer,
+    ProductoSerializer,
+    ProductoEspecificacionesDetailSerializer,
+)
 from apps.catalogo.filters import ProductoFilter
 from apps.usuarios.permissions import IsAdminOrReadOnly
 from apps.usuarios.models import CustomUser
+
 
 # ==============================================================================
 # VIEWSETS DE LA API REST (DRF)
@@ -132,6 +140,37 @@ class ProductoViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
+
+    @extend_schema(
+        summary="Tabla de especificaciones técnicas",
+        description="Retorna la tabla y diccionario estructurado de especificaciones técnicas del producto de hardware.",
+        responses={
+            200: ProductoEspecificacionesDetailSerializer,
+            404: OpenApiResponse(description="Producto no encontrado o inactivo."),
+        },
+        tags=["Catálogo"],
+    )
+    @action(detail=True, methods=['get'], url_path='especificaciones')
+    def especificaciones(self, request, pk=None):
+        """
+        Endpoint GET /api/productos/{id}/especificaciones/
+        Devuelve las especificaciones técnicas del componente estructuradas
+        como diccionario y como tabla de pares clave-valor.
+        """
+        producto = self.get_object()
+        serializer = ProductoEspecificacionesDetailSerializer({
+            "producto_id": producto.id,
+            "nombre": producto.nombre,
+            "sku": producto.sku,
+            "categoria": producto.categoria.nombre,
+            "marca": producto.marca.nombre,
+            "precio": producto.precio,
+            "disponible": producto.tiene_stock,
+            "especificaciones": producto.especificaciones or {},
+            "tabla": producto.get_especificaciones_items,
+        })
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 # ==============================================================================

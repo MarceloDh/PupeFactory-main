@@ -501,10 +501,18 @@ class Command(BaseCommand):
             },
         ]
 
+        from .specs_data import IMAGE_CATEGORY_MAP, IMAGE_SPECIFIC_MAP, HARDWARE_SPECS
+
         count = 0
         for pdata in productos_data:
             sku = pdata['sku']
+            cat_slug = pdata['categoria'].slug
+            local_img = IMAGE_SPECIFIC_MAP.get(sku) or IMAGE_CATEGORY_MAP.get(cat_slug, 'productos/rtx4070.jpg')
+            specs = HARDWARE_SPECS.get(sku, {})
+            pdata['imagen'] = local_img
+            pdata['especificaciones'] = specs
             p, created = Producto.objects.update_or_create(sku=sku, defaults=pdata)
             count += 1
 
-        self.stdout.write(self.style.SUCCESS(f"[OK] Catálogo enriquecido exitosamente con {count} productos de hardware y stock realista."))
+        self.stdout.write(self.style.SUCCESS(f"[OK] Catálogo enriquecido exitosamente con {count} productos de hardware, imágenes locales y especificaciones técnicas."))
+

@@ -442,3 +442,43 @@ class CatalogoTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(Marca.objects.filter(pk=marca_vacia.pk).exists())
 
+    def test_33_endpoint_especificaciones_tecnicas(self):
+        """33. GET /api/productos/{id}/especificaciones/ devuelve tabla y diccionario estructurado."""
+        self.prod_ryzen.especificaciones = {
+            'Socket': 'AM5',
+            'Núcleos': '8',
+            'TDP': '120W',
+        }
+        self.prod_ryzen.save()
+
+        url = f"/api/productos/{self.prod_ryzen.id}/especificaciones/"
+        response = self.client_anon.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['producto_id'], self.prod_ryzen.id)
+        self.assertEqual(response.data['sku'], self.prod_ryzen.sku)
+        self.assertEqual(response.data['especificaciones']['Socket'], 'AM5')
+        self.assertIsInstance(response.data['tabla'], list)
+        self.assertEqual(len(response.data['tabla']), 3)
+        self.assertEqual(response.data['tabla'][0]['clave'], 'Socket')
+        self.assertEqual(response.data['tabla'][0]['valor'], 'AM5')
+
+    def test_34_endpoint_especificaciones_producto_inactivo_oculto(self):
+        """34. GET /api/productos/{id}/especificaciones/ para producto inactivo retorna 404 para público."""
+        url = f"/api/productos/{self.prod_inactivo.id}/especificaciones/"
+        response = self.client_anon.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_35_producto_get_imagen_url_fallback(self):
+        """35. get_imagen_url retorna URL remota o fallback si no hay archivo en disco."""
+        prod = Producto.objects.create(
+            nombre='Prueba Imagen Fallback',
+            sku='IMG-TEST-001',
+            categoria=self.cat_cpu,
+            marca=self.marca_amd,
+            precio=Decimal('100.00'),
+            stock=1,
+            imagen_url='https://example.com/imagen.jpg'
+        )
+        self.assertEqual(prod.get_imagen_url, 'https://example.com/imagen.jpg')
+
+
