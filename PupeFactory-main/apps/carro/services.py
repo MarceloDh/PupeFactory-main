@@ -1,9 +1,6 @@
-from decimal import Decimal
-from django.core.exceptions import ValidationError
 from rest_framework.exceptions import NotFound, ValidationError as DRFValidationError
 from apps.carro.models import Carrito, CarritoItem
 from apps.catalogo.models import Producto
-from apps.usuarios.models import CustomUser
 
 
 class CartService:

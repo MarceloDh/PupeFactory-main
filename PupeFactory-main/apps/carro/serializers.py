@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from decimal import Decimal
 from drf_spectacular.utils import extend_schema_field
 from apps.carro.models import Carrito, CarritoItem
 

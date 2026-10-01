@@ -1,18 +1,15 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
-from apps.carro.models import Carrito, CarritoItem
 from apps.carro.services import CartService
 from apps.carro.serializers import (
     CarritoSerializer,
-    CarritoItemSerializer,
     AgregarItemSerializer,
     ActualizarItemSerializer,
 )

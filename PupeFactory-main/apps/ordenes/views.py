@@ -8,11 +8,10 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
-from apps.ordenes.models import Orden, OrdenItem
+from apps.ordenes.models import Orden
 from apps.ordenes.services import OrdenService
 from apps.ordenes.serializers import (
     OrdenSerializer,
-    OrdenItemSerializer,
     CambiarEstadoOrdenSerializer,
 )
 from apps.carro.services import CartService

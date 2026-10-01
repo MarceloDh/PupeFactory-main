@@ -4,7 +4,6 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.views.generic import ListView, DetailView
-from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.db.models import Q, ProtectedError
 from drf_spectacular.utils import extend_schema, OpenApiResponse

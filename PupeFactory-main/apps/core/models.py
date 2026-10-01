@@ -1,3 +1,1 @@
-from django.db import models
-
-# Create your models here.
+# Core app models (no custom models defined here)

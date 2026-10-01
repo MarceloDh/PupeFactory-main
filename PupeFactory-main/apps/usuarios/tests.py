@@ -2,9 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
-from rest_framework_simplejwt.tokens import UntypedToken
 import jwt
-from django.conf import settings
 from apps.usuarios.models import CustomUser
 
 # ==============================================================================

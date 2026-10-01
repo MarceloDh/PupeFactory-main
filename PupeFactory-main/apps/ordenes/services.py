@@ -1,10 +1,8 @@
 import logging
 from decimal import Decimal
 from django.db import transaction
-from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as DRFValidationError, NotFound
 
-from apps.carro.models import Carrito, CarritoItem
 from apps.carro.services import CartService
 from apps.catalogo.models import Producto
 from apps.ordenes.models import Orden, OrdenItem

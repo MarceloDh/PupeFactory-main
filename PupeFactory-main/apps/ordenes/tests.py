@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from apps.catalogo.models import Categoria, Marca, Producto
-from apps.carro.models import Carrito, CarritoItem
+from apps.carro.models import Carrito
 from apps.carro.services import CartService
 from apps.ordenes.models import Orden, OrdenItem
 from apps.ordenes.services import OrdenService

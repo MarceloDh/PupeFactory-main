@@ -1,3 +1,1 @@
-from django.contrib import admin
-
-# Register your models here.
+# Core admin configuration (no models registered directly here)
