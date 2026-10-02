@@ -305,12 +305,34 @@ class OrdenesTestCase(TestCase):
         res = self.client_a.post(self.url_checkout)
         orden_id = res.data['id']
 
-        # ENTREGADO es estado terminal
-        OrdenService.cambiar_estado_orden(orden_id, Orden.Estado.ENTREGADO)
+        # CANCELADO es estado terminal definitivo
+        OrdenService.cambiar_estado_orden(orden_id, Orden.Estado.CANCELADO)
 
         url_estado = reverse('api_orden_estado', kwargs={'pk': orden_id})
-        res_patch = self.client_admin.patch(url_estado, {'estado': 'CANCELADO'}, format='json')
+        res_patch = self.client_admin.patch(url_estado, {'estado': 'PAGADO'}, format='json')
         self.assertEqual(res_patch.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_12_b_devolucion_orden_entregada_repone_stock(self):
+        """12b. Cancelar o procesar devolución de una orden entregada devuelve el stock físico."""
+        CartService.add_item(self.cliente_a, self.prod_cpu.id, cantidad=1)
+        res = self.client_a.post(self.url_checkout)
+        orden_id = res.data['id']
+
+        # Transicionar a ENTREGADO
+        OrdenService.cambiar_estado_orden(orden_id, Orden.Estado.ENTREGADO)
+        self.prod_cpu.refresh_from_db()
+        self.assertEqual(self.prod_cpu.stock, 4)
+
+        # Admin procesa devolución / cancelación
+        url_estado = reverse('api_orden_estado', kwargs={'pk': orden_id})
+        res_patch = self.client_admin.patch(url_estado, {'estado': 'CANCELADO'}, format='json')
+        self.assertEqual(res_patch.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_patch.data['estado'], 'CANCELADO')
+        self.assertTrue(res_patch.data['stock_reincorporado'])
+
+        # Stock restituido al catálogo
+        self.prod_cpu.refresh_from_db()
+        self.assertEqual(self.prod_cpu.stock, 5)
 
     # --------------------------------------------------------------------------
     # 6. HISTORIAL Y SEGURIDAD ANTI-IDOR

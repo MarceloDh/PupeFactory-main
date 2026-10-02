@@ -22,8 +22,8 @@ class Orden(models.Model):
     TRANSICIONES_VALIDAS = {
         Estado.PENDIENTE: [Estado.PAGADO, Estado.CANCELADO],
         Estado.PAGADO: [Estado.ENTREGADO, Estado.CANCELADO],
-        Estado.ENTREGADO: [],  # Estado terminal
-        Estado.CANCELADO: [],  # Estado terminal
+        Estado.ENTREGADO: [Estado.CANCELADO],  # Devolución o cancelación de orden entregada
+        Estado.CANCELADO: [],  # Estado terminal definitivo
     }
 
     numero_orden = models.CharField(

@@ -77,7 +77,7 @@ class OrdenService:
                 producto = productos[item.producto_id]
                 producto.stock -= item.cantidad
                 producto.save(update_fields=['stock', 'actualizado_en'])
-        elif nuevo_estado == Orden.Estado.CANCELADO and orden.estado == Orden.Estado.PAGADO:
+        elif nuevo_estado == Orden.Estado.CANCELADO and orden.estado in (Orden.Estado.PAGADO, Orden.Estado.ENTREGADO):
             if not orden.stock_reincorporado:
                 productos = cls._productos_bloqueados(items)
                 for item in items:
