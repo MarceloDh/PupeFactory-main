@@ -11,6 +11,17 @@ if (-not (Test-Path (Join-Path $taskData 'PG_VERSION'))) {
 }
 switch ($Action) {
     'start' {
+        # Limpiar postmaster.pid huérfano si el proceso ya no existe
+        $pidFile = Join-Path $taskData 'postmaster.pid'
+        if (Test-Path $pidFile) {
+            $pidVal = (Get-Content $pidFile -TotalCount 1).Trim()
+            if ($pidVal -match '^\d+$') {
+                $proc = Get-Process -Id ([int]$pidVal) -ErrorAction SilentlyContinue
+                if (-not $proc) {
+                    Remove-Item -Force $pidFile -ErrorAction SilentlyContinue
+                }
+            }
+        }
         # La disponibilidad TCP también funciona si el proceso fue iniciado por otra sesión.
         & (Join-Path $taskBin 'pg_isready.exe') -h 127.0.0.1 -p 5432 *> $null
         if ($LASTEXITCODE -ne 0) {
