@@ -5,6 +5,7 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError, NotFound
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from apps.carro.models import CarritoItem
@@ -14,7 +15,7 @@ from apps.carro.serializers import (
     AgregarItemSerializer,
     ActualizarItemSerializer,
 )
-from apps.usuarios.permissions import IsClienteRole
+from apps.usuarios.permissions import IsClienteRole, ClienteWebMixin
 from apps.usuarios.models import CustomUser
 
 
@@ -126,7 +127,7 @@ class CarritoItemDetailAPIView(APIView):
 # VISTAS WEB TRADICIONALES (DJANGO SESSIONS / TEMPLATES)
 # ==============================================================================
 
-class CarroDetalleWebView(LoginRequiredMixin, View):
+class CarroDetalleWebView(ClienteWebMixin, View):
     """
     Vista web que renderiza la plantilla detalle.html con los ítems y totales del carro.
     """
@@ -147,7 +148,7 @@ class CarroDetalleWebView(LoginRequiredMixin, View):
         return render(request, 'carro/detalle.html', context)
 
 
-class CarroAgregarWebView(LoginRequiredMixin, View):
+class CarroAgregarWebView(ClienteWebMixin, View):
     """
     Procesa la incorporación de productos al carro desde la interfaz web (ej: botón en detalle de producto).
     """
@@ -162,7 +163,7 @@ class CarroAgregarWebView(LoginRequiredMixin, View):
         try:
             item, created = CartService.add_item(request.user, producto_id, cantidad)
             messages.success(request, f"Se agregaron {cantidad} un. de '{item.producto.nombre}' al carro.")
-        except Exception as e:
+        except (ValidationError, NotFound) as e:
             msg = getattr(e, 'detail', str(e))
             if isinstance(msg, dict) and 'error' in msg:
                 msg = msg['error']
@@ -171,7 +172,7 @@ class CarroAgregarWebView(LoginRequiredMixin, View):
         return redirect('carro_detalle')
 
 
-class CarroActualizarWebView(LoginRequiredMixin, View):
+class CarroActualizarWebView(ClienteWebMixin, View):
     """
     Permite incrementar (+), decrementar (-) o ajustar la cantidad de un ítem desde la web.
     """
@@ -188,16 +189,13 @@ class CarroActualizarWebView(LoginRequiredMixin, View):
                 return redirect('carro_detalle')
 
             if accion == 'incrementar':
-                CartService.update_item_quantity(request.user, producto_id, item.cantidad + 1)
+                CartService.change_quantity(request.user, producto_id, 1)
             elif accion == 'decrementar':
-                if item.cantidad > 1:
-                    CartService.update_item_quantity(request.user, producto_id, item.cantidad - 1)
-                else:
-                    CartService.remove_item(request.user, producto_id)
+                CartService.change_quantity(request.user, producto_id, -1)
             elif cantidad:
                 CartService.update_item_quantity(request.user, producto_id, cantidad)
 
-        except Exception as e:
+        except (ValidationError, NotFound) as e:
             msg = getattr(e, 'detail', str(e))
             if isinstance(msg, dict) and 'error' in msg:
                 msg = msg['error']
@@ -206,7 +204,7 @@ class CarroActualizarWebView(LoginRequiredMixin, View):
         return redirect('carro_detalle')
 
 
-class CarroEliminarWebView(LoginRequiredMixin, View):
+class CarroEliminarWebView(ClienteWebMixin, View):
     """
     Elimina un ítem específico del carro desde la vista web.
     """
@@ -216,13 +214,13 @@ class CarroEliminarWebView(LoginRequiredMixin, View):
         try:
             CartService.remove_item(request.user, producto_id)
             messages.info(request, "Producto eliminado del carro.")
-        except Exception:
+        except (ValidationError, NotFound):
             messages.error(request, "No se pudo eliminar el producto del carro.")
 
         return redirect('carro_detalle')
 
 
-class CarroVaciarWebView(LoginRequiredMixin, View):
+class CarroVaciarWebView(ClienteWebMixin, View):
     """
     Vacía todos los productos del carro desde la vista web.
     """

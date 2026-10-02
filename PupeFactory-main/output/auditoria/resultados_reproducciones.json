@@ -1,0 +1,39 @@
+{
+  "cancelacion_desde_admin": {
+    "stock_antes": 8,
+    "stock_despues": 8,
+    "esperado": 10,
+    "estado": "CANCELADO"
+  },
+  "checkout_mismo_carro_intercalado": {
+    "ordenes_creadas": 2,
+    "esperado": 1,
+    "metodo": "intercalado determinista; no son hilos ni bloqueo PostgreSQL"
+  },
+  "pago_pendiente_producto_inactivo": {
+    "estado_obtenido": "PAGADO",
+    "esperado": "rechazo"
+  },
+  "catalogo_paginacion": {
+    "productos_totales": 14,
+    "tarjetas_pagina1": 12,
+    "tarjetas_pagina2": 2,
+    "enlace_page_en_html": false
+  },
+  "busqueda_api": {
+    "con_q": 14,
+    "con_search": 1
+  },
+  "filtro_precio_web": {
+    "tarjetas_con_precio_min_10000": 12,
+    "esperado": 0
+  },
+  "persistencia_logout": {
+    "logout_status": 302,
+    "unidades_otra_sesion": 1
+  },
+  "openapi_generacion": {
+    "ok": true,
+    "rutas": 17
+  }
+}

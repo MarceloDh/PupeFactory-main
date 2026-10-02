@@ -2,6 +2,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from apps.usuarios.models import CustomUser
+from django.contrib.auth.models import Group, Permission
 
 # ==============================================================================
 # COMANDO PARA CREAR USUARIOS DE PRUEBA (SOLO DESARROLLO / DEBUG=True)
@@ -69,6 +70,12 @@ class Command(BaseCommand):
         admin.role = CustomUser.Role.ADMINISTRADOR
         admin.is_staff = True
         admin.save()
+        # Acceso a inventario y acciones de órdenes, sin privilegios de superusuario.
+        grupo, _ = Group.objects.get_or_create(name='Gestores de tienda')
+        permisos = Permission.objects.filter(content_type__app_label='catalogo') | Permission.objects.filter(
+            content_type__app_label='ordenes', codename__in=['view_orden', 'change_orden', 'view_ordenitem'])
+        grupo.permissions.set(permisos)
+        admin.groups.add(grupo)
         status_admin = "creado" if created else "actualizado"
         self.stdout.write(self.style.SUCCESS(f"Usuario {admin.username} ({status_admin}) - Rol: {admin.role}"))
 

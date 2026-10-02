@@ -1,0 +1,19 @@
+{% extends "admin/delete_selected_confirmation.html" %}
+{% load l10n %}
+{% block content_title %}<h1>Desactivar productos</h1>{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumbs"><li><a href="{% url 'admin:index' %}">Inicio</a></li><li><a href="{% url 'admin:catalogo_producto_changelist' %}">Productos</a></li><li>Desactivar</li></ol>
+{% endblock %}
+{% block content %}
+{% if perms_lacking or protected %}{{ block.super }}{% else %}
+<p>Estos productos dejarán de aparecer en la tienda. Se conservarán sus datos, stock y compras anteriores; podrás reactivarlos más adelante.</p>
+<ul>{% for producto in queryset %}<li>{{ producto }}</li>{% endfor %}</ul>
+<form method="post">{% csrf_token %}
+    {% for producto in queryset %}<input type="hidden" name="{{ action_checkbox_name }}" value="{{ producto.pk|unlocalize }}">{% endfor %}
+    <input type="hidden" name="action" value="delete_selected">
+    <input type="hidden" name="post" value="yes">
+    <input type="submit" value="Desactivar productos">
+    <a href="{% url 'admin:catalogo_producto_changelist' %}" class="button">Volver a la lista</a>
+</form>
+{% endif %}
+{% endblock %}

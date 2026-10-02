@@ -1,0 +1,17 @@
+{% extends "admin/delete_confirmation.html" %}
+{% load admin_urls %}
+{% block content_title %}<h1>Desactivar producto</h1>{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumbs"><li><a href="{% url 'admin:index' %}">Inicio</a></li><li><a href="{% url 'admin:catalogo_producto_changelist' %}">Productos</a></li><li>Desactivar</li></ol>
+{% endblock %}
+{% block delete_confirm %}
+<p>¿Quieres desactivar <strong>{{ object }}</strong>?</p>
+<p>Dejará de aparecer en la tienda y no se podrá comprar. Se conservan sus datos, su stock y las órdenes anteriores. Puedes reactivarlo desde la lista de productos.</p>
+<form method="post">{% csrf_token %}
+    <input type="hidden" name="post" value="yes">
+    {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+    {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+    <input type="submit" value="Desactivar producto">
+    <a href="{% url 'admin:catalogo_producto_change' object.pk %}" class="button">Volver al producto</a>
+</form>
+{% endblock %}

@@ -112,11 +112,19 @@
     </div>
 
     <!-- ESPECIFICACIONES / DESCRIPCIÓN -->
-    <section class="specs-section">
-        <h2 class="specs-title">Descripción y Especificaciones Técnicas</h2>
+    <section class="specs-section" id="ficha-tecnica" aria-labelledby="ficha-titulo">
+        <h2 class="specs-title" id="ficha-titulo">Ficha técnica</h2>
         <div class="specs-content">
             {{ producto.descripcion|default:"No se han registrado especificaciones adicionales para este componente." }}
         </div>
+        {% if producto.get_especificaciones_items %}
+        <table class="specs-table">
+            <caption>Características de {{ producto.nombre }}</caption>
+            <tbody>{% for item in producto.get_especificaciones_items %}
+                <tr><th scope="row">{{ item.clave }}</th><td>{{ item.valor }}</td></tr>
+            {% endfor %}</tbody>
+        </table>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

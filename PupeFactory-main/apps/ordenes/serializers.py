@@ -47,6 +47,7 @@ class OrdenSerializer(serializers.ModelSerializer):
     usuario = serializers.IntegerField(source='usuario.id', read_only=True)
     usuario_username = serializers.CharField(source='usuario.username', read_only=True)
     fecha = serializers.DateTimeField(source='creado_en', read_only=True)
+    total = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
 
     class Meta:
         model = Orden

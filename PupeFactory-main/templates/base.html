@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PupeFactory — Hardware & Componentes PC{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+    <meta name="theme-color" content="#ff3292">
 
     <!-- Google Fonts: Poppins (400, 500, 600, 700) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,6 +80,10 @@
                         </a>
                     {% endif %}
 
+                    {% if user.is_administrador %}
+                    <a class="action-link" href="{% url 'admin:index' %}">Administración</a>
+                    <a class="action-link" href="{% url 'swagger-ui' %}">API</a>
+                    {% endif %}
                     <form action="{% url 'logout' %}" method="post" style="display:inline;">
                         {% csrf_token %}
                         <button type="submit" class="action-link" style="background: none; border: none; cursor: pointer;" title="Cerrar Sesión">

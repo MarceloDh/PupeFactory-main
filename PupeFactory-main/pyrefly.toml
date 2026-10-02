@@ -1,0 +1,6 @@
+# Configuración al abrir directamente la carpeta que contiene manage.py.
+project-includes = ["apps/**/*.py", "pupefactory/**/*.py", "manage.py", "scripts/**/*.py"]
+search-path = ["."]
+python-interpreter-path = ".venv/Scripts/python.exe"
+site-package-path = [".venv/Lib/site-packages"]
+preset = "basic"

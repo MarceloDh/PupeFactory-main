@@ -1,5 +1,5 @@
 import os
-from django.db import models
+from django.db import models, transaction
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 
@@ -87,12 +87,6 @@ class Producto(models.Model):
         verbose_name='URL de Imagen Externa',
         help_text='Enlace HTTP/HTTPS a imagen del producto si no se sube archivo local.'
     )
-    especificaciones = models.JSONField(
-        default=dict,
-        blank=True,
-        verbose_name='Especificaciones Técnicas',
-        help_text='Diccionario de especificaciones técnicas clave-valor del componente'
-    )
     activo = models.BooleanField(
         default=True,
         verbose_name='¿Activo para la venta?',
@@ -124,6 +118,34 @@ class Producto(models.Model):
         return self.stock > 0
 
     @property
+    def especificaciones(self):
+        """Compatibilidad API: diccionario construido desde filas atómicas normalizadas."""
+        if hasattr(self, '_especificaciones_pendientes'):
+            return self._especificaciones_pendientes
+        if not self.pk:
+            return {}
+        return {item.clave: item.valor for item in self.fichas_tecnicas.all()}
+
+    @especificaciones.setter
+    def especificaciones(self, value):
+        self._especificaciones_pendientes = dict(value or {})
+
+    def save(self, *args, **kwargs):
+        # El CRUD conserva su representación JSON, pero persiste atributos en otra tabla.
+        if not hasattr(self, '_especificaciones_pendientes'):
+            return super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            self.fichas_tecnicas.all().delete()
+            EspecificacionProducto.objects.bulk_create([
+                EspecificacionProducto(producto=self, clave=clave, valor=str(valor))
+                for clave, valor in self._especificaciones_pendientes.items()
+            ])
+            del self._especificaciones_pendientes
+            if hasattr(self, '_prefetched_objects_cache'):
+                self._prefetched_objects_cache.pop('fichas_tecnicas', None)
+
+    @property
     def get_especificaciones_items(self):
         """Retorna lista de diccionarios [{'clave': k, 'valor': v}] para renderizado en tabla HTML."""
         if not self.especificaciones or not isinstance(self.especificaciones, dict):
@@ -147,5 +169,19 @@ class Producto(models.Model):
     def imagen_final(self):
         """Alias para get_imagen_url asegurando compatibilidad con plantillas y serializadores."""
         return self.get_imagen_url
+
+
+class EspecificacionProducto(models.Model):
+    """Un valor por atributo del producto: clave candidata (producto, clave), en 3FN."""
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='fichas_tecnicas')
+    clave = models.CharField(max_length=100)
+    valor = models.TextField()
+
+    class Meta:
+        ordering = ['id']
+        constraints = [models.UniqueConstraint(fields=['producto', 'clave'], name='unique_producto_especificacion')]
+
+    def __str__(self):
+        return f'{self.clave}: {self.valor}'
 
 

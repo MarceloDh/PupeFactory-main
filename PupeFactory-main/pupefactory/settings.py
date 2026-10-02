@@ -212,8 +212,8 @@ SPECTACULAR_SETTINGS = {
 # ==============================================================================
 # DATOS DEL ESTUDIANTE (REQUERIMIENTO RÚBRICA - FOOTER)
 # ==============================================================================
-ALUMNO_NOMBRE = os.environ.get('ALUMNO_NOMBRE', 'Nombre Alumno')
-ALUMNO_SECCION = os.environ.get('ALUMNO_SECCION', 'Sección 1')
+ALUMNO_NOMBRE = os.environ.get('ALUMNO_NOMBRE', 'Marcelo Ducommun')
+ALUMNO_SECCION = os.environ.get('ALUMNO_SECCION', 'IEC-N4-C1')
 ALUMNO_ANIO = os.environ.get('ALUMNO_ANIO', '2026')
 
 # ==============================================================================

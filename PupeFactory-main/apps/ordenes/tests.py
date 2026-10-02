@@ -217,15 +217,15 @@ class OrdenesTestCase(TestCase):
     # --------------------------------------------------------------------------
     # 4. CONCURRENCIA Y BLOQUEO PESIMISTA (SELECT_FOR_UPDATE)
     # --------------------------------------------------------------------------
-    def test_08_concurrencia_dos_compras_simultaneas_select_for_update(self):
-        """8. Dos compras simultáneas sobre 1 sola unidad en stock: 1 éxito y 1 rechazo sin sobreventa."""
+    def test_08_dos_compras_secuenciales_ultima_unidad(self):
+        """8. Compras secuenciales: una compra y el siguiente intento se rechaza."""
         self.prod_gpu.stock = 1
         self.prod_gpu.save()
 
         CartService.add_item(self.cliente_a, self.prod_gpu.id, cantidad=1)
         CartService.add_item(self.cliente_b, self.prod_gpu.id, cantidad=1)
 
-        # Simulando dos checkouts secuenciales protegidos por select_for_update
+        # La concurrencia real se cubre en test_regresiones con PostgreSQL.
         res1 = self.client_a.post(self.url_checkout)
         res2 = self.client_b.post(self.url_checkout)
 

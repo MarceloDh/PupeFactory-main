@@ -45,3 +45,12 @@ class CoreAuditTestCase(TestCase):
         self.assertContains(response, alumno_seccion)
         self.assertContains(response, alumno_anio)
         self.assertContains(response, 'PupeFactory')
+
+    def test_footer_en_administracion_y_swagger(self):
+        from apps.usuarios.models import CustomUser
+        usuario = CustomUser.objects.create_superuser(username='audit_admin', password='Password123!', role='ADMINISTRADOR')
+        self.client.force_login(usuario)
+        for ruta in ('/admin/', '/api/docs/', '/api/redoc/'):
+            with self.subTest(ruta=ruta):
+                self.assertContains(self.client.get(ruta), settings.ALUMNO_NOMBRE)
+                self.assertContains(self.client.get(ruta), settings.ALUMNO_SECCION)

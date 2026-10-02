@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 from apps.usuarios.models import CustomUser
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseForbidden
 
 # ==============================================================================
 # PERMISOS BASADOS EN ROLES (RBAC - ROLE-BASED ACCESS CONTROL)
@@ -61,4 +63,12 @@ class IsAdminOrReadOnly(BasePermission):
             request.user.is_authenticated and
             (request.user.role == CustomUser.Role.ADMINISTRADOR or request.user.is_superuser)
         )
+
+
+class ClienteWebMixin(LoginRequiredMixin):
+    """Misma política de cliente en todos los métodos web de carro y compras."""
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.role != CustomUser.Role.CLIENTE:
+            return HttpResponseForbidden('Esta acción está reservada para clientes.')
+        return super().dispatch(request, *args, **kwargs)
 

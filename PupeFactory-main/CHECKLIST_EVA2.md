@@ -1,121 +1,39 @@
-# CHECKLIST EVALUACIÓN EVA-2 — BACKEND (GRUPO 1: PUPEFACTORY)
+# Checklist EVA-2 — Proyecto 1
 
-> **Asignatura:** Desarrollo Backend  
-> **Proyecto:** Tienda de Hardware y Componentes PC (PupeFactory)  
-> **Ponderación:** 25% total asignatura (30% Desarrollo Técnico + 70% Defensa Oral)  
-> **Puntaje Total:** 100 Puntos  
+Marcelo Ducommun · IEC-N4-C1 · 2026. Actualizado tras corregir la auditoría del 1 de octubre de 2026.
 
----
+| Requisito técnico oficial | Estado y evidencia |
+|---|---|
+| Django/DRF y nombre acorde al proyecto | Implementado y ejecutado |
+| PostgreSQL activo | PostgreSQL 17.11, base `pupefactory_db`; SQLite no es el motor de entrega |
+| Modelos relacionados, FK y OneToOne | Modelos y migraciones aplicadas |
+| CHOICES | Roles y estados de Orden |
+| JWT access/refresh y claim de rol | Pruebas de autenticación aprobadas |
+| Permisos públicos/cliente/administrador | API protegida, aislamiento por propietario y web de cliente consistente |
+| Carro persistente tras logout | BD vinculada 1:1 y pruebas de persistencia |
+| Agregar, modificar y eliminar ítems | API y web; bloqueo compartido con checkout |
+| Evitar duplicados | Restricciones únicas en carro/producto y orden/producto |
+| Agregar no descuenta stock | Prueba específica aprobada |
+| Checkout histórico y precio congelado | OrdenItem; cambio posterior del catálogo no altera venta |
+| PAGADO valida y descuenta stock | Servicio compartido por checkout, API y acciones administrativas |
+| Stock insuficiente rechaza compra | Pruebas de rechazo y rollback |
+| CANCELADO devuelve stock una vez | Servicio atómico; pruebas de Admin y cancelación concurrente |
+| ENTREGADO y estados terminales | Transiciones explícitas y pruebas |
+| Filtros django-filter | Categoría, marca, rango de precio, disponibilidad; web y API |
+| Swagger/OpenAPI | Carga visual comprobada, esquema validado sin advertencias |
+| Comentarios de lógica | Docstrings/bloques en modelos, servicios, permisos, vistas, serializadores y administración |
+| Nombre, sección y año en footer | Marcelo Ducommun · IEC-N4-C1 · 2026; tienda, Admin y documentación |
 
-## Leyenda de Estados
-- `[ ]` Pendiente
-- `[x]` Implementado y Probado
-- `[!]` En revisión / Por validar
+| Referencias de pizarra y calidad | Estado |
+|---|---|
+| CRUD | Catálogo vía API y Django Admin; baja lógica de productos vendidos |
+| 3FN | Especificaciones normalizadas y totales derivados; justificación en MODELO_3FN.md |
+| Refactorización | Servicios compartidos; reglas no duplicadas en Admin |
+| 404 con re_path | HTML personalizado y JSON API; pruebas aprobadas |
+| Catálogo completo | Paginación visible, conserva filtros |
+| Interfaz móvil de carro/checkout | Columnas adaptables y revisión visual |
+| Concurrencia real | Cinco pruebas PostgreSQL con conexiones independientes |
 
----
+Pendientes externos: defensa individual (70 puntos), publicación de estos cambios en GitHub y cumplimiento de la hora límite. Las instrucciones del Proyecto 1 no requieren tickets UUID ni un mall con múltiples tiendas.
 
-## 1. Pauta de Cotejo Técnica (Checklist de Entrega Oficial)
-
-| Elemento | Requerimiento Técnico | Estado | Verificación / Archivos |
-| :--- | :--- | :---: | :--- |
-| **Base de Datos** | Conexión activa a PostgreSQL en `settings.py` (`django.db.backends.postgresql`) | [x] | `pupefactory/settings.py` y `pupefactory_db` |
-| **Documentación** | Swagger / OpenAPI operativo en `/api/docs/` (restringido a administradores) | [x] | `drf-spectacular`, `core/views.py` (Probado: admin 200, cliente 403, anónimo 401) |
-| **Comentarios** | Código documentado en bloques explícitos indicando la lógica | [x] | Todos los modelos y configuraciones (.py) |
-| **Datos Alumno** | Nombre Completo, Sección y Año presentes en la vista/footer base | [x] | `templates/base.html`, `apps/core/context_processors.py` (Verificado y probado) |
-| **Modelos** | Atributo con `CHOICES` definido (estados de orden/transacción) | [x] | `apps/ordenes/models.py` (`Orden.Estado.choices`) |
-| **Filtros** | `django-filter` configurado en endpoints de consulta (`/api/productos/`) | [x] | `apps/catalogo/filters.py` (Categoría, marca, precio_min, precio_max, disponible) |
-| **Autenticación** | Login JWT retornando tokens (access/refresh) y claims de rol | [x] | `apps/usuarios/serializers.py` (`user_id`, `username`, `role`) |
-| **Carro** | Persistencia post-logout en PostgreSQL (relación 1:1 con usuario) | [x] | Modelo `Carrito` (1:1), endpoints `/api/carro/`, templates web (26 tests aprobados) |
-| **Stock/Cupos** | Validación y descuento atómico al cambiar a estado `PAGADO` | [x] | `apps/ordenes/services.py` (select_for_update, reposición al cancelar) |
-
----
-
-## 2. Requerimientos de la Rúbrica Analítica (30% Desarrollo Backend)
-
-### 2.1 Conexión DB, CHOICES y Filtros (6 Pts)
-- [x] Configuración nativa de motor PostgreSQL (`psycopg` / `psycopg2-binary`).
-- [x] Modelos relacionados con integridad referencial (ForeignKeys, OneToOne).
-- [x] Implementación de `CHOICES` explícito en estados de orden (`PENDIENTE`, `PAGADO`, `ENTREGADO`, `CANCELADO`).
-- [x] `django-filter` implementado con filtros por categoría, marca, rango de precio (`min_price`, `max_price`), disponibilidad.
-- [x] Búsqueda por texto (nombre, marca, SKU).
-
-### 2.2 Autenticación JWT y Roles (8 Pts)
-- [x] Endpoints de token JWT (`/api/auth/token/`, `/api/auth/token/refresh/`).
-- [x] Inclusión de claims personalizados en el payload JWT (`role`: `CLIENTE` o `ADMINISTRADOR`, `username`, `user_id`).
-- [x] Permisos DRF:
-  - Lectura pública: `/api/productos/`, `/api/categorias/` [x].
-  - Protegido (`IsAuthenticated` / Cliente): `/api/carro/` [x]; `/api/ordenes/checkout/`, `/api/mis-ordenes/` [x].
-  - Restringido (`IsAdminUser` / `IsAdminRole`): Swagger `/api/docs/` y CRUD productos (`POST`, `PUT`, `PATCH`, `DELETE`) [x]; CRUD y cambio de estado de órdenes (`/api/ordenes/{id}/estado/`) [x].
-
-### 2.3 Persistencia del Carro de Compras (8 Pts)
-- [x] Relación 1 a 1 entre Usuario y Carro activo en BD PostgreSQL.
-- [x] CarroItem con clave única `(carrito, producto)` para evitar duplicidad de registros del mismo producto.
-- [x] Persistencia garantizada al cerrar sesión o cambiar de dispositivo.
-- [x] Métodos para agregar, actualizar cantidad y eliminar ítems.
-
-### 2.4 Lógica de Stock y Transacciones Atómicas (8 Pts)
-- [x] Agregar al carro **NO** descuenta inventario (probado en tests Fase 4).
-- [x] Transición de estados de la orden: `PENDIENTE` -> `PAGADO` -> `ENTREGADO` / `CANCELADO`.
-- [x] Descuento de stock únicamente al pasar a `PAGADO`.
-- [x] Uso estricto de transacciones atómicas (`transaction.atomic()`) y bloqueo pesimista (`select_for_update()`) para compras concurrentes.
-- [x] Si stock es insuficiente al pagar, la transacción se cancela/rechaza sin afectar datos.
-- [x] Reposición automática de stock al catálogo si una orden `PAGADO` pasa a `CANCELADO`.
-- [x] Control para evitar doble reposición de inventario (`stock_reincorporado = BooleanField(default=False)`).
-- [x] Congelación de precio histórico en `OrdenItem.precio_unitario` (3FN).
-
----
-
-## 3. Requerimientos de Fotografías de la Pizarra y Pautas Adicionales
-
-- [x] **3FN (Tercera Forma Normal):** Modelo relacional normalizado sin dependencias parciales ni transitivas; congelación de precio histórico en `OrdenItem.precio_unitario`.
-- [x] **Refactoring Guru / Clean Code:** Separación de responsabilidades, funciones pequeñas, uso de `services.py` para lógica de negocio pesada (`apps/ordenes/services.py`, `apps/carro/services.py`).
-- [x] **Error 404 Personalizado:**
-  - Template `404.html` estilizado según la identidad visual de la tienda para rutas web (`/FRgregreghre` -> HTML 404).
-  - Rutas de API inexistentes retornan JSON estandarizado (`/api/FRgregreghre/` -> `{ "error": "Recurso no encontrado.", "status": 404 }`).
-  - Botón "Volver al inicio", sin stack traces ni páginas amarillas de depuración.
-  - Manejador `handler404` en `urls.py` y `re_path(r'^.*$')`.
-  - Excepciones API limpias en JSON (`{ "error": "Recurso no encontrado.", "status": 404 }`).
-- [x] **Protección Estricta de Swagger/OpenAPI:**
-  - `/api/docs/` y `/api/schema/` accesibles exclusivamente por usuarios con rol `ADMINISTRADOR`.
-  - Clientes y anónimos reciben 403 Forbidden o 401 Unauthorized en backend.
-  - Soporte Bearer JWT integrado en Swagger UI.
-- [x] **Frontend Django Templates:**
-  - Diseño temático "PupeFactory" base (`base.html`, `login.html`, `home.html`, `404.html`).
-  - Footer con datos del alumno visible y renderizado en todas las vistas base. [x]
-  - Catálogo, detalle de producto y carro web interactivo implementados y probados. [x]
-  - Checkout, confirmación de compra y mis órdenes web implementados y probados. [x]
-
----
-
-## 4. Matriz de Endpoints API Requeridos
-
-| Método | Endpoint | Rol Requerido | Descripción | Estado |
-| :--- | :--- | :--- | :--- | :---: |
-| `POST` | `/api/auth/token/` | Público | Obtener tokens JWT (con claim `role`) | [x] |
-| `POST` | `/api/auth/token/refresh/` | Público | Refrescar token access | [x] |
-| `GET` | `/api/productos/` | Público | Listado y filtros de productos | [x] |
-| `GET` | `/api/productos/{id}/` | Público | Detalle de un producto | [x] |
-| `GET` | `/api/categorias/` | Público | Listado de categorías | [x] |
-| `GET` | `/api/carro/` | Cliente | Consultar carro activo del usuario | [x] |
-| `POST` | `/api/carro/` | Cliente | Agregar producto o modificar cantidad | [x] |
-| `DELETE` | `/api/carro/{producto_id}/` | Cliente | Eliminar producto del carro | [x] |
-| `POST` | `/api/ordenes/checkout/` | Cliente | Iniciar compra / checkout | [x] |
-| `GET` | `/api/mis-ordenes/` | Cliente | Historial de órdenes del usuario logueado | [x] |
-| `POST` | `/api/productos/` | Administrador | Crear nuevo producto | [x] |
-| `PUT/PATCH` | `/api/productos/{id}/` | Administrador | Modificar producto existente | [x] |
-| `DELETE` | `/api/productos/{id}/` | Administrador | Desactivar producto (baja lógica `activo=False`) | [x] |
-| `PATCH` | `/api/ordenes/{id}/estado/` | Administrador | Cambiar estado de orden (manejo de stock) | [x] |
-| `GET` | `/api/docs/` | Administrador | Documentación Swagger/OpenAPI protegida | [x] |
-
----
-
-## 5. Preparación para Defensa Oral (70% de la Nota)
-
-- [ ] Explicación de configuración de PostgreSQL y modelo relacional (1:1, 1:N).
-- [ ] Justificación de 3FN y precio histórico en `OrdenItem`.
-- [ ] Explicación del ciclo JWT: access token, refresh token y claims personalizados.
-- [ ] Justificación del carro de compras persistente en base de datos.
-- [ ] Explicación de transacciones atómicas (`transaction.atomic`), concurrencia y `select_for_update()`.
-- [ ] Explicación de permisos DRF (`IsAuthenticated`, roles personalizados, Swagger protegido).
-- [ ] Explicación del sistema de filtros `django-filter` y búsqueda.
-- [ ] Justificación de decisiones de refactorización y arquitectura limpia (`services.py`).
+Verificación final del 1 de octubre de 2026: **120 pruebas aprobadas sobre PostgreSQL**, sin errores del sistema ni migraciones pendientes. Esquema OpenAPI validado con `--fail-on-warn`. Checkout revisado a 390 px: contenido de 375 px dentro de área útil de 375 px, sin desbordamiento horizontal. Se conservan 42 productos, 265 especificaciones y 2 órdenes originales. La cuenta temporal de revisión visual fue retirada sin generar compras.

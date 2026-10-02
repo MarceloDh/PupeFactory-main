@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.views.generic import ListView, DetailView
 from django.http import Http404
 from django.db.models import Q, ProtectedError
+from django.db import transaction
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from apps.catalogo.models import Categoria, Marca, Producto
@@ -114,7 +115,7 @@ class ProductoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        base_qs = Producto.objects.select_related('categoria', 'marca')
+        base_qs = Producto.objects.select_related('categoria', 'marca').prefetch_related('fichas_tecnicas')
         
         # Administradores pueden ver todos los productos (incluyendo inactivos para gestión)
         if user.is_authenticated and (getattr(user, 'role', None) == CustomUser.Role.ADMINISTRADOR or user.is_superuser):
@@ -130,7 +131,7 @@ class ProductoViewSet(viewsets.ModelViewSet):
         """
         instance = self.get_object()
         instance.activo = False
-        instance.save()
+        instance.save(update_fields=['activo', 'actualizado_en'])
         return Response(
             {
                 "mensaje": f"Producto '{instance.nombre}' desactivado exitosamente (baja lógica).",
@@ -139,6 +140,12 @@ class ProductoViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
+
+    def perform_update(self, serializer):
+        # Releer bajo bloqueo para que una edición no sobrescriba el stock de una compra.
+        with transaction.atomic():
+            serializer.instance = Producto.objects.select_for_update().get(pk=serializer.instance.pk)
+            serializer.save()
 
     @extend_schema(
         summary="Tabla de especificaciones técnicas",
@@ -222,6 +229,9 @@ class CatalogoListView(ListView):
                     Q(marca__slug__iexact=val_marca) | Q(marca__nombre__iexact=val_marca)
                 )
             
+        # Reutilizar django-filter evita divergencias con los filtros de la API.
+        qs = ProductoFilter(self.request.GET, queryset=qs).qs
+
         # Filtro por disponibilidad
         disponible = self.request.GET.get('disponible')
         if disponible:
@@ -241,6 +251,11 @@ class CatalogoListView(ListView):
         context['current_categoria'] = self.request.GET.get('categoria', '').strip()
         context['current_marca'] = self.request.GET.get('marca', '').strip()
         context['current_disponible'] = self.request.GET.get('disponible', '').strip()
+        context['current_precio_min'] = self.request.GET.get('precio_min', '').strip()
+        context['current_precio_max'] = self.request.GET.get('precio_max', '').strip()
+        params = self.request.GET.copy()
+        params.pop('page', None)
+        context['pagination_query'] = params.urlencode()
         return context
 
 

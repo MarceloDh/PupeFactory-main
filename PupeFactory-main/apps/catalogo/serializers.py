@@ -34,6 +34,7 @@ class ProductoSerializer(serializers.ModelSerializer):
     marca_nombre = serializers.ReadOnlyField(source='marca.nombre')
     disponible = serializers.BooleanField(source='tiene_stock', read_only=True)
     imagen_final = serializers.CharField(source='get_imagen_url', read_only=True, allow_null=True)
+    especificaciones = serializers.DictField(child=serializers.CharField(), required=False)
 
     class Meta:
         model = Producto
@@ -64,6 +65,15 @@ class ProductoSerializer(serializers.ModelSerializer):
         if value <= Decimal('0.00'):
             raise serializers.ValidationError("El precio debe ser mayor a cero.")
         return value
+
+    def validate_especificaciones(self, value):
+        if any(not clave.strip() or len(clave) > 100 for clave in value):
+            raise serializers.ValidationError('Cada característica debe tener un nombre de 1 a 100 caracteres.')
+        return value
+
+    def create(self, validated_data):
+        """La propiedad del modelo convierte el diccionario en atributos relacionados."""
+        return Producto.objects.create(**validated_data)
 
     def validate_stock(self, value):
         """Valida que el stock no sea negativo."""

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from apps.usuarios.models import CustomUser
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 # ==============================================================================
 # SERIALIZADOR DE AUTENTICACIÓN JWT CON CLAIMS PERSONALIZADOS
@@ -49,6 +51,7 @@ class RegistroSerializer(serializers.ModelSerializer):
     """
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
+    email = serializers.EmailField(required=True, allow_blank=False)
 
     class Meta:
         model = CustomUser
@@ -70,6 +73,12 @@ class RegistroSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('password_confirm'):
             raise serializers.ValidationError({"password_confirm": "Las contraseñas no coinciden."})
+        try:
+            validate_password(attrs['password'], CustomUser(
+                username=attrs.get('username', ''), email=attrs.get('email', ''),
+                first_name=attrs.get('first_name', ''), last_name=attrs.get('last_name', '')))
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({'password': exc.messages})
         return attrs
 
     def create(self, validated_data):

@@ -54,6 +54,14 @@
                 </select>
             </div>
 
+            <div class="filter-group">
+                <label for="filter-price-min" class="filter-label">Precio mínimo</label>
+                <input class="filter-input" id="filter-price-min" type="number" name="precio_min" min="0" step="1" value="{{ current_precio_min }}">
+            </div>
+            <div class="filter-group">
+                <label for="filter-price-max" class="filter-label">Precio máximo</label>
+                <input class="filter-input" id="filter-price-max" type="number" name="precio_max" min="0" step="1" value="{{ current_precio_max }}">
+            </div>
             <!-- Disponibilidad de Stock -->
             <div class="filter-group">
                 <label for="filter-stock" class="filter-label">Disponibilidad</label>
@@ -83,7 +91,7 @@
         <div class="products-header">
             <div>
                 <h1 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text);">Hardware y Componentes</h1>
-                <span class="products-count">Mostrando <strong>{{ productos|length }}</strong> componentes</span>
+                <span class="products-count">Mostrando <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> de {{ paginator.count }} componentes</span>
             </div>
         </div>
 
@@ -156,6 +164,13 @@
                 </div>
             {% endfor %}
         </div>
+        {% if is_paginated %}
+        <nav class="pagination" aria-label="Páginas del catálogo">
+            {% if page_obj.has_previous %}<a class="btn-secondary" href="?{{ pagination_query }}&amp;page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+            <span>Página {{ page_obj.number }} de {{ paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a class="btn-secondary" href="?{{ pagination_query }}&amp;page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+        </nav>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

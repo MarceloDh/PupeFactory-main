@@ -43,13 +43,6 @@ class Orden(models.Model):
         default=Estado.PENDIENTE,
         verbose_name='Estado de la Orden'
     )
-    total = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=Decimal('0.00'),
-        validators=[MinValueValidator(Decimal('0.00'))],
-        verbose_name='Monto Total de la Compra (CLP)'
-    )
     stock_reincorporado = models.BooleanField(
         default=False,
         verbose_name='¿Stock devuelto tras cancelación?',
@@ -64,11 +57,16 @@ class Orden(models.Model):
         ordering = ['-creado_en']
 
     def __str__(self):
-        return f"Orden #{self.numero_orden} - {self.usuario.username} [{self.get_estado_display()}]"
+        return f"Orden {self.numero_orden} - {self.usuario.username} [{self.get_estado_display()}]"
 
     def puede_transicionar_a(self, nuevo_estado):
         """Verifica si la transición solicitada es legal según la máquina de estados del negocio."""
         return nuevo_estado in self.TRANSICIONES_VALIDAS.get(self.estado, [])
+
+    @property
+    def total(self):
+        """Total derivado de los hechos de venta, sin guardar un agregado duplicado."""
+        return sum((item.subtotal for item in self.items.all()), Decimal('0.00'))
 
 
 class OrdenItem(models.Model):
@@ -104,6 +102,7 @@ class OrdenItem(models.Model):
         verbose_name = 'Ítem de Orden'
         verbose_name_plural = 'Ítems de Orden'
         constraints = [
+            models.UniqueConstraint(fields=['orden', 'producto'], name='unique_orden_producto'),
             models.CheckConstraint(
                 condition=models.Q(cantidad__gt=0),
                 name='chk_orden_item_cantidad_positiva'

@@ -1,0 +1,6 @@
+# Configuración al abrir la carpeta exterior del repositorio en el editor.
+project-includes = ["PupeFactory-main/apps/**/*.py", "PupeFactory-main/pupefactory/**/*.py", "PupeFactory-main/manage.py", "PupeFactory-main/scripts/**/*.py"]
+search-path = ["PupeFactory-main"]
+python-interpreter-path = "PupeFactory-main/.venv/Scripts/python.exe"
+site-package-path = ["PupeFactory-main/.venv/Lib/site-packages"]
+preset = "basic"

@@ -493,7 +493,7 @@ class Command(BaseCommand):
                 'sku': 'FAN-COR-SP120-3PK',
                 'categoria': cat_objs['refrigeracion'],
                 'marca': marca_objs['corsair'],
-                'descripcion': 'Pack de tres ventiladores de alta presión estática con 8 LEDs RGB por aspa y controlador iCUE Lighting Node CORE.',
+                'descripcion': 'Pack de tres ventiladores PWM con 8 LEDs RGB direccionables por ventilador y controlador iCUE Lighting Node CORE.',
                 'precio': Decimal('64990.00'),
                 'stock': 20,
                 'activo': True,

@@ -31,7 +31,7 @@
 
     {% if items %}
         <!-- Layout a 2 columnas: Lista de productos y Resumen de Compra -->
-        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start;">
+        <div class="purchase-layout">
             <!-- Columna izquierda: Tabla / Lista de Ítems -->
             <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;">
                 <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
@@ -40,7 +40,7 @@
 
                 <div style="divide-y: 1px solid var(--border);">
                     {% for item in items %}
-                        <div style="display: grid; grid-template-columns: 90px 1fr auto; gap: 1.25rem; padding: 1.25rem; border-bottom: 1px solid var(--border); align-items: center;">
+                        <div class="cart-item-layout">
                             <!-- Imagen Miniatura -->
                             <div style="width: 90px; height: 90px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; padding: 0.25rem;">
                                 {% if item.producto.get_imagen_url %}

@@ -390,47 +390,47 @@ HARDWARE_SPECS = {
     },
 
     # GABINETES
-    'NZXT H5 Flow RGB Black': {
+    'CASE-NZXT-H5F-BK': {
         'Tipo de Gabinete': 'Mid-Tower ATX',
         'Dimensiones': '464 x 227 x 446 mm',
         'Material': 'Acero SGCC y Vidrio Templado oscurecido',
         'Soporte Motherboard': 'ATX, Micro-ATX, Mini-ITX',
-        'Ventiladores Incluidos': '2x F140 RGB frontales + 1x ventilador dedicado para GPU',
+        'Ventiladores Incluidos': '2x F140 RGB Core frontales + 2x F120Q (trasero e inferior)',
         'Soporte Radiador': 'Hasta 280mm frontal / 240mm superior',
-        'Longitud Máxima GPU': '365 mm',
-        'Conectividad Frontal': '1x USB-C 3.2 Gen 2, 1x USB 3.2 Type-A, Audio Jack'
+        'Longitud Máxima GPU': 'Hasta 365 mm; descontar espacio de ventiladores o radiador frontal',
+        'Conectividad Frontal': '1x USB-C, 1x USB-A, jack combinado de 3.5 mm'
     },
-    'Corsair 4000D Airflow': {
+    'CASE-COR-4000D-AIR': {
         'Tipo de Gabinete': 'Mid-Tower ATX',
         'Panel Frontal': 'Malla triangular de alto flujo de aire',
         'Soporte Motherboard': 'ATX, Micro-ATX, Mini-ITX',
         'Ventiladores Incluidos': '2x Corsair AirGuide 120mm',
-        'Soporte Radiador': 'Hasta 360mm frontal / 280mm superior',
-        'Longitud Máxima GPU': '360 mm'
+        'Dimensiones (largo × ancho × alto)': '453 × 230 × 466 mm',
+        'Capacidad de Ventilación': 'Hasta 6 ventiladores de 120 mm o 4 de 140 mm'
     },
 
     # REFRIGERACION
-    'NZXT Kraken 360 RGB': {
+    'COOL-NZXT-KR360': {
         'Tipo': 'Refrigeración Líquida Todo en Uno (AIO)',
-        'Tamaño Radiador': '360 mm (394 x 121 x 27 mm de aluminio)',
-        'Ventiladores': '3x 120mm F120 RGB Core PWM (500 - 1,800 RPM)',
-        'Display de Bomba': 'Pantalla LCD circular de 1.54 pulg (240x240 px, 30 Hz)',
+        'Tamaño Radiador': 'Clase 360 mm; radiador de aluminio',
+        'Ventiladores': '3x 120 mm F120 RGB Core + controlador RGB NZXT',
+        'Display de Bomba': 'Panel LCD de 1.54 pulgadas, 240 × 240 px',
         'Compatibilidad Socket': 'Intel LGA 1700/1200/115X, AMD AM5/AM4',
         'Bomba': 'Motor Asetek de 7ma generación (800 - 2,800 RPM)'
     },
-    'DeepCool AK620 Digital': {
+    'COOL-DC-AK620D': {
         'Tipo': 'Cooler por aire de doble torre',
         'Tubos de Calor': '6x Heatpipes de cobre niquelado de 6 mm',
         'Ventiladores': '2x 120mm PWM Fluid Dynamic Bearing (FDB)',
         'Pantalla Digital': 'Display en tiempo real de temperatura y uso de CPU',
-        'Capacidad Térmica (TDP)': 'Hasta 260 Watts',
+        'Velocidad de Ventiladores': '500–1850 RPM (±10%), PWM de 4 pines',
         'Altura Total': '162 mm',
         'Compatibilidad': 'Intel LGA1700/1200/115X, AMD AM5/AM4'
     },
-    'Corsair iCUE SP120 RGB': {
+    'FAN-COR-SP120-3PK': {
         'Contenido': 'Pack de 3 Ventiladores + Controlador Lighting Node CORE',
         'Dimensiones': '120 x 120 x 25 mm',
-        'Velocidad de Giro': '550 - 1,500 RPM (Control PWM)',
+        'Velocidad de Giro': '400–1500 RPM (control PWM)',
         'Flujo de Aire': '47.73 CFM',
         'Presión Estática': '1.46 mm-H2O',
         'Iluminación': '8 LEDs RGB direccionables individualmente por ventilador'

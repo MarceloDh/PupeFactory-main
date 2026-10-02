@@ -26,7 +26,7 @@
         </p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 2rem; align-items: start;">
+    <div class="purchase-layout">
         <!-- Columna Izquierda: Detalle de Ítems a Comprar -->
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem;">
             <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
@@ -78,7 +78,7 @@
                 <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
                     <div><strong>Cliente:</strong> {{ user.get_full_name|default:user.username }} ({{ user.email|default:"Sin email" }})</div>
                     <div><strong>Tipo de Despacho:</strong> Despacho Express Especializado en Hardware</div>
-                    <div><strong>Condición de Venta:</strong> Stock físico garantizado con descuento atómico</div>
+                    <div><strong>Disponibilidad:</strong> Se verifica al confirmar la compra</div>
                 </div>
             </div>
         </div>
@@ -129,7 +129,7 @@
                 <svg class="icon icon-sm" viewBox="0 0 24 24" style="color: var(--success); flex-shrink: 0;">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
-                <span>Stock asegurado y congelamiento de precio histórico (3FN) con transacción atómica.</span>
+                <span>Conservaremos el detalle y los precios de tu compra en el historial.</span>
             </div>
         </div>
     </div>

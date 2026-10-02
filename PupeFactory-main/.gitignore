@@ -22,6 +22,10 @@ wheels/
 
 # Virtual Environment
 .venv/
+.venv-ready/
+.venv-original/
+.runtime/
+output/auditoria/pauta-*.png
 venv/
 ENV/
 env/

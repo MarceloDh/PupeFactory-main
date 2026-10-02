@@ -1,4 +1,5 @@
 from rest_framework.exceptions import NotFound, ValidationError as DRFValidationError
+from django.db import transaction
 from apps.carro.models import Carrito, CarritoItem
 from apps.catalogo.models import Producto
 
@@ -23,6 +24,7 @@ class CartService:
         return carrito
 
     @classmethod
+    @transaction.atomic
     def add_item(cls, user, producto_id, cantidad=1):
         """
         Agrega un producto al carro o incrementa su cantidad si ya existe.
@@ -45,6 +47,10 @@ class CartService:
         if cantidad <= 0:
             raise DRFValidationError({"error": "La cantidad a agregar debe ser mayor a cero.", "status": 400})
 
+        # Bloqueo compartido con checkout: no se pierden incrementos concurrentes.
+        carrito = cls.get_or_create_cart(user)
+        carrito = Carrito.objects.select_for_update().get(pk=carrito.pk)
+
         # 2. Validar existencia del producto
         try:
             producto = Producto.objects.get(pk=producto_id)
@@ -60,7 +66,6 @@ class CartService:
             raise DRFValidationError({"error": "El producto se encuentra agotado.", "status": 400})
 
         # 5. Obtener carro del usuario
-        carrito = cls.get_or_create_cart(user)
 
         # 6. Validar acumulación respecto al stock físico
         item = CarritoItem.objects.filter(carrito=carrito, producto=producto).first()
@@ -90,6 +95,7 @@ class CartService:
         return item, created
 
     @classmethod
+    @transaction.atomic
     def update_item_quantity(cls, user, producto_id, nueva_cantidad):
         """
         Actualiza directamente la cantidad de un ítem existente en el carro del usuario.
@@ -109,6 +115,7 @@ class CartService:
             raise DRFValidationError({"error": "La cantidad debe ser al menos 1 unidad.", "status": 400})
 
         carrito = cls.get_or_create_cart(user)
+        carrito = Carrito.objects.select_for_update().get(pk=carrito.pk)
         item = CarritoItem.objects.select_related('producto').filter(carrito=carrito, producto_id=producto_id).first()
 
         if not item:
@@ -130,12 +137,14 @@ class CartService:
         return item
 
     @classmethod
+    @transaction.atomic
     def remove_item(cls, user, producto_id):
         """
         Elimina un ítem específico del carro del usuario.
         No modifica el stock del producto.
         """
         carrito = cls.get_or_create_cart(user)
+        carrito = Carrito.objects.select_for_update().get(pk=carrito.pk)
         item = CarritoItem.objects.filter(carrito=carrito, producto_id=producto_id).first()
 
         if not item:
@@ -145,11 +154,27 @@ class CartService:
         return True
 
     @classmethod
+    @transaction.atomic
     def clear_cart(cls, user):
         """
         Elimina todos los ítems del carro del usuario.
         Mantiene intacta la instancia 1:1 de Carrito.
         """
         carrito = cls.get_or_create_cart(user)
+        carrito = Carrito.objects.select_for_update().get(pk=carrito.pk)
         carrito.items.all().delete()
         return True
+
+    @classmethod
+    @transaction.atomic
+    def change_quantity(cls, user, producto_id, delta):
+        """Botones +/-: leer y modificar bajo el bloqueo del carro evita perder cambios."""
+        carrito = cls.get_or_create_cart(user)
+        carrito = Carrito.objects.select_for_update().get(pk=carrito.pk)
+        item = carrito.items.filter(producto_id=producto_id).first()
+        if item is None:
+            raise NotFound('El producto no se encuentra en el carro.')
+        cantidad = item.cantidad + delta
+        if cantidad <= 0:
+            return cls.remove_item(user, producto_id)
+        return cls.update_item_quantity(user, producto_id, cantidad)

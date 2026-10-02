@@ -1,0 +1,6 @@
+{% extends "drf_spectacular/redoc.html" %}
+{% load static %}
+{% block head %}{{ block.super }}<link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">{% endblock %}
+{% block body %}{{ block.super }}
+<footer style="padding:1rem;text-align:center;">{{ ALUMNO_NOMBRE }} · {{ ALUMNO_SECCION }} · {{ ALUMNO_ANIO }}</footer>
+{% endblock %}

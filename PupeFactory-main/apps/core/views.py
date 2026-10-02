@@ -17,7 +17,10 @@ def home_view(request):
     Carga categorías y productos destacados con imágenes para el panel principal.
     """
     from apps.catalogo.models import Producto, Categoria
-    categorias = Categoria.objects.all().order_by('nombre')
+    from django.db.models import Count, Q
+    categorias = Categoria.objects.annotate(
+        total_productos=Count('productos', filter=Q(productos__activo=True))
+    ).filter(total_productos__gt=0).order_by('nombre')
     productos_destacados = Producto.objects.filter(activo=True).select_related('categoria', 'marca').order_by('-id')[:4]
     
     context = {
@@ -50,6 +53,7 @@ class ProtectedSpectacularSwaggerView(SpectacularSwaggerView):
     Protegido en backend con IsAdminRole.
     """
     permission_classes = [IsAdminRole]
+    template_name = 'api/swagger.html'
 
 
 class ProtectedSpectacularRedocView(SpectacularRedocView):
@@ -58,6 +62,7 @@ class ProtectedSpectacularRedocView(SpectacularRedocView):
     Protegido en backend con IsAdminRole.
     """
     permission_classes = [IsAdminRole]
+    template_name = 'api/redoc.html'
 
 
 # ==============================================================================

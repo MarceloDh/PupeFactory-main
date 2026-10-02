@@ -1,0 +1,102 @@
+/* Identidad de la tienda sobre los componentes nativos de Django Admin. */
+:root, html[data-theme="light"] {
+    --primary: #b51c66;
+    --secondary: #9e1558;
+    --accent: #fff;
+    --primary-fg: #fff;
+    --body-fg: #25252d;
+    --body-bg: #f5f6f8;
+    --body-quiet-color: #667085;
+    --body-medium-color: #475467;
+    --body-loud-color: #171717;
+    --header-bg: #fff;
+    --header-color: #475467;
+    --header-branding-color: #171717;
+    --header-link-color: #9e1558;
+    --breadcrumbs-bg: #fdf2f8;
+    --breadcrumbs-fg: #475467;
+    --breadcrumbs-link-fg: #9e1558;
+    --link-fg: #9e1558;
+    --link-hover-color: #781143;
+    --link-selected-fg: #9e1558;
+    --border-color: #e5e7eb;
+    --hairline-color: #edf0f3;
+    --darkened-bg: #fafafb;
+    --selected-bg: #fdf2f8;
+    --selected-row: #fce7f3;
+    --button-bg: #b51c66;
+    --button-hover-bg: #9e1558;
+    --default-button-bg: #b51c66;
+    --default-button-hover-bg: #9e1558;
+    --object-tools-bg: #b51c66;
+    --object-tools-hover-bg: #9e1558;
+    --pf-surface: #fff;
+    --pf-tint: #fdf2f8;
+    --font-family-primary: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+}
+
+html[data-theme="dark"] {
+    --primary: #d72c7c;
+    --secondary: #bd226b;
+    --accent: #fff;
+    --header-bg: #181b23;
+    --header-color: #c7cbd5;
+    --header-branding-color: #fff;
+    --header-link-color: #ff8abd;
+    --breadcrumbs-bg: #292030;
+    --breadcrumbs-fg: #d1c8d5;
+    --breadcrumbs-link-fg: #ff8abd;
+    --link-fg: #ff8abd;
+    --link-hover-color: #ffb6d7;
+    --link-selected-fg: #ff8abd;
+    --button-bg: #b51c66;
+    --button-hover-bg: #9e1558;
+    --default-button-bg: #b51c66;
+    --default-button-hover-bg: #9e1558;
+    --object-tools-bg: #b51c66;
+    --object-tools-hover-bg: #9e1558;
+    --pf-surface: #1c2029;
+    --pf-tint: #292030;
+}
+
+#header { border-bottom: 3px solid #ec3e8f; padding: 18px 32px; gap: 16px; }
+.admin-brand { display: flex; align-items: center; gap: 20px; text-decoration: none; }
+.admin-brand img { object-fit: contain; border-radius: 6px; background: #fff; }
+.admin-brand span { font-size: 14px; font-weight: 600; color: var(--header-branding-color); }
+#user-tools { font-size: 12px; letter-spacing: 0; text-transform: none; line-height: 2; }
+#user-tools a, #logout-form button { border-bottom: 0; font-weight: 500; }
+nav ol.breadcrumbs { padding: 14px 32px; border-bottom: 1px solid var(--border-color); }
+#content h1 { color: var(--body-loud-color); font-weight: 600; font-size: 24px; margin-bottom: 24px; }
+.module, #changelist, #content-related { border: 1px solid var(--border-color); border-radius: 10px; background: var(--pf-surface); box-shadow: 0 2px 8px #00000005; }
+.module { overflow: hidden; }
+.module h2, .module caption, .inline-group h2 { background: var(--pf-tint); color: var(--body-loud-color); font-weight: 600; padding: 14px 18px; }
+.module caption a.section:link, .module caption a.section:visited { color: var(--link-fg); }
+.dashboard .module table td, .dashboard .module table th { padding: 16px 18px; }
+.dashboard #content-related { background: var(--pf-surface); padding: 16px; }
+.dashboard #content-related h2 { background: transparent; }
+thead th { background: var(--darkened-bg); }
+#changelist .results { border-radius: 8px; }
+#toolbar { background: var(--pf-surface); border-radius: 10px 10px 0 0; }
+#changelist-filter h2 { border-radius: 8px 8px 0 0; }
+.button, input[type="submit"], input[type="button"], .submit-row input, .object-tools a { border-radius: 6px; font-weight: 500; }
+input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="url"], textarea, select { border-radius: 6px; }
+input:focus, textarea:focus, select:focus { outline: 2px solid #ec3e8f; outline-offset: 2px; }
+.submit-row { background: var(--pf-surface); border-radius: 8px; }
+#nav-sidebar { background: var(--pf-surface); }
+#footer { padding: 22px; text-align: center; color: var(--body-quiet-color); border-top: 1px solid var(--border-color); font-size: 12px; }
+.login #container { border-radius: 14px; box-shadow: 0 12px 36px #1717170c; background: var(--pf-surface); overflow: hidden; }
+.login #header { padding: 20px; }
+.login .admin-brand { flex-direction: column; gap: 10px; margin: auto; }
+.login #content { padding: 24px; }
+.login .submit-row { padding: 16px 0 0; text-align: center; }
+.login .submit-row input { width: 100%; padding: 12px; }
+@media (max-width: 767px) {
+    #header { padding: 16px; }
+    .admin-brand { flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .admin-brand span { font-size: 12px; }
+    nav ol.breadcrumbs { padding: 12px 16px; }
+    #content h1 { font-size: 20px; }
+    .related-widget-wrapper { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%; }
+    .related-widget-wrapper select { max-width: 100%; }
+    .related-widget-wrapper-link { flex-shrink: 0; }
+}
